@@ -4,8 +4,9 @@ Created on 14/06/2012
 @author: lcammx
 '''
 
-import sys
-sys.path.append('/home/lsjcp/www/modules/') #RUTA HACIA LOS MODULOS
+import sys, os
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+sys.path.append(path_to('../'))
 
 from jornada.json.api import Api
 from cgi import parse_qs, escape

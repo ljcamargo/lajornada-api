@@ -3,8 +3,9 @@ Created on 13/05/2012
 
 @author: lcammx
 '''
-import sys
-sys.path.append('/home/lsjcp/www/modules')
+import sys, os
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+sys.path.append(path_to('../../'))
 
 from collections import defaultdict
 from xml.dom import minidom
@@ -174,12 +175,13 @@ class Impresa(parsing):
         j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=True)
         filename = const.SAVING_ROUTE + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
         f = open(filename, 'w')
+        print 'Escribiendo archivo: %s' % filename
         f.write(j)
         f.close()
         
     def dumpJsonHeuristics(self, jItems):
         j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
-        filename = const.SAVING_ROUTE + const.SAVING_HEURISTICS_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
+        filename = const.SAVING_ROUTE + '/' + const.SAVING_HEURISTICS_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
         f = open(filename, 'w')
         f.write(j)
         f.close()
