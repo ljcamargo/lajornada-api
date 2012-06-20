@@ -4,8 +4,10 @@ Created on 13/06/2012
 @author: lcammx
 '''
 
-#SAVING_ROUTE = 'var/'
-SAVING_ROUTE = '/home/lsjcp/www/var/'
+import os
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+
+SAVING_ROUTE = path_to('../../var')
 SAVING_NAME = 'jornada_impresa_'
 SAVING_ERROR_NAME = 'error_impresa_'
 SAVING_HEURISTICS_NAME = 'heuristics_impresa_'
@@ -29,3 +31,4 @@ LOCALE_CULTURE = "MX"
 LOCALE_ENCODING = "UTF-8"
 CONFIG_IMGSIZE = "1024x1024"
 CONFIG_SNAPSIZE = "480x480"
+
