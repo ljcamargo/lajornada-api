@@ -176,7 +176,7 @@ class Impresa(parsing):
             
     def dumpJsonItems(self, jItems):
         j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
-        filename = const.SAVING_ROUTE + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
+        filename = const.SAVING_ROUTE + '/' +  const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
         f = open(filename, 'w')
         print 'Escribiendo archivo: %s' % filename
         f.write(j)
@@ -199,7 +199,7 @@ class Impresa(parsing):
            "message" : error.__str__()
            }]
         j =  json.dumps(jError, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=True)
-        filename = const.SAVING_ROUTE + const.SAVING_ERROR_NAME + self.year + '_' + self.month + '_' + self.day + '_' + now.strftime("%H_%M_%S") + '.json'
+        filename = const.SAVING_ROUTE + "/" + const.SAVING_ERROR_NAME + self.year + '_' + self.month + '_' + self.day + '_' + now.strftime("%H_%M_%S") + '.json'
         f = open(filename, 'w')
         f.write(j)
         f.close()
