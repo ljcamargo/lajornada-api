@@ -38,26 +38,29 @@ class parsing(object):
         
     def getRecursiveText(self, nodelist):
             rc = []
-            try:
+            if hasattr(nodelist, 'hasChildNodes'):
                 if nodelist.hasChildNodes():
                     for node in nodelist.childNodes: 
                         val = self.getRecursiveText(node)
                         if val != None:
                             val = val.strip()
                             if val != "" and not val.isspace():                              
-                                rc.append(val)
+                                rc.append(val+ "  ")
                 else:
                     if nodelist.nodeType == nodelist.TEXT_NODE:
                         val = self.getLastText(nodelist)                   
                         if val != None:
                             val = val.strip()
                             if val != "" and not val.isspace():                              
-                                rc.append(val)
-                    
-            except Exception as e:
-                rci = e.__str__()
-                return rci
-            return ''.join(rc)
+                                rc.append(val+ "  ")            
+            else:
+                for nodeitem in nodelist:
+                    val = self.getRecursiveText(nodeitem)
+                    if val != None:
+                        val = val.strip()
+                        if val != "" and not val.isspace():                              
+                            rc.append(val+ "  ")
+            return self.joinLines(rc, " \r", 1)
         
     def getLastText(self, node):
             rc = ""
@@ -97,11 +100,75 @@ class parsing(object):
                                     mem = val
                                 else:                                
                                     rc.append(mem+val)
-                                    mem = ""
-                    
+                                    mem = ""                   
             except Exception as e:
                 rci = e.__str__()
                 return [rci]
             return rc
 
-
+    def getHtmlFromParragraphs(self, content):
+        text = ""
+        if isinstance(content, list):
+            for item in content:
+                if hasattr(item, 'nodeName'):
+                    val =  item.toxml()
+                    if val != None:
+                        val = val.strip()
+                        if val != "" and not val.isspace():   
+                            text += val
+        else:
+            if hasattr(content, 'hasChildNodes'):
+                if content.hasChildNodes():
+                    for child in content.childNodes:
+                        val =  item.toxml()
+                        if val != None:
+                            val = val.strip()
+                            if val != "" and not val.isspace():   
+                                text += val
+            else:
+                val =  item.toxml()
+                if val != None:
+                    val = val.strip()
+                    if val != "" and not val.isspace():   
+                        text += val
+        return text
+            
+    def joinLines(self, lst, breaker, minimus):
+        txt = ""
+        for i in range(len(lst)):
+            txt += lst[i]
+            if i<(len(lst)-1):
+                if len(lst[i])>1:
+                    txt+= breaker
+        return txt
+    
+    def getListItems(self, content):
+        rlist = []
+        
+        if isinstance(content, list):
+            mem = ""
+            for item in content:
+                itxt = ""
+                itxt = self.getRecursiveText(item)
+                if itxt != None:
+                    itxt = itxt.strip()
+                    if itxt != "" and not itxt.isspace():
+                        if len(itxt)>2:
+                            rlist.append(mem+itxt)
+                            mem = ""
+                        else:
+                            mem = itxt
+            if len(mem)>0: rlist.append(mem)
+        else :
+            rlist.append(self.getRecursiveText(content))
+        return rlist
+    
+    
+    def appendNodeToHeuristics(self, heuristics, node, words, keywords):
+        for item in node:
+            if item.nodeName=='p':
+                inp = self.getRecursiveText(item)
+                if inp != None:
+                    if inp != '':
+                        heuristics._matchTextToList(inp, words)
+                        heuristics._matchTextToDict(inp, keywords)    

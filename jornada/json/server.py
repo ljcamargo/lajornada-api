@@ -25,7 +25,8 @@ class Server(BaseHTTPRequestHandler):
                 month = params.get("month")[0] if params.has_key("month") else ""
                 day = params.get("day")[0] if params.has_key("day") else ""
                 detail = params.get("detail")[0] if params.has_key("detail") else ""
-                thisapi = Api(family,section,mtype,txt,noteid,year,month,day,detail)
+                richness = params.get("richness")[0] if params.has_key("richness") else ""
+                thisapi = Api(family,section,mtype,txt,noteid,year,month,day,detail,richness)
                 #Application/json
                 self.send_response(200)
                 self.send_header('Content-type', 'text/json')
@@ -44,7 +45,7 @@ class Server(BaseHTTPRequestHandler):
             
 def main():
     try:
-        server = HTTPServer(('0.0.0.0', 80), Server)
+        server = HTTPServer(('0.0.0.0', 1984), Server)
         print 'started httpserver...'
         server.serve_forever()
     except KeyboardInterrupt:

@@ -60,6 +60,52 @@ class Heuristics(object):
             
         return dict
     
+    
+    #POINTER
+    
+    def _matchArrayToList(self, textl, list):
+            for text in textl:
+                self._matchTextToList(text, list)
+            
+    def _matchTextToList(self, text, list):
+        words = text.split()
+        for word in words:
+            self._appendWordToList(word, list)
+    
+    def _matchArrayToDict(self, textl, dict):
+        for text in textl:
+            self._matchTextToDict(text, dict)
+        
+    def _matchTextToDict(self, text, dict):
+        words = text.split()
+        for word in words:
+            self._appendWordToFreqDict(word, dict)
+    
+    def _appendWordToList(self, text, list):
+        text = text.replace("(","")
+        text = text.replace(")","")
+        isIn = False
+        for litem in list:
+            if litem == text: 
+                isIn = True
+        if not isIn:
+            lang = LANG()
+            if lang.isNounOrVerb(text):
+                list.append(text)  
+    
+    def _appendWordToFreqDict(self, text, dict):
+        text = text.replace("(","")
+        text = text.replace(")","")
+        if dict.has_key(text):
+            dict[text] += 1
+        else:
+            lang = LANG()
+            if lang.isNounOrVerb(text):
+                dict[text] = 1
+    
+    
+    
+    
     def selectHigherKeywords(self, infra, dict):
         for k,v in dict.iteritems():
             if v<infra:
@@ -105,8 +151,6 @@ class Heuristics(object):
                         score +=1
         return score
                     
-        
-
 
 if __name__ == '__main__':
     pass

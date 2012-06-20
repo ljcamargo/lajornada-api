@@ -3,6 +3,7 @@ Created on 18/06/2012
 
 @author: lcammx
 '''
+import re
 
 class Language(object):
 
@@ -10,6 +11,10 @@ class Language(object):
         #GRAMMAR CATEGORIES
         self.articles = {  
             "determinate" : { "el", "la", "los", "las" },
+            "undeterminate" : { "un", "unos", "una", "unas" }                          
+            }
+        self.adjetives = {  
+            "posesive" : { "mi", "mis", "tu", "tus", "su", "sus", "nuestro", "nuestros", "nuestra", "nuestras", "vuestro", "vuestros", "vuestra", "vuestras" },
             "undeterminate" : { "un", "unos", "una", "unas" }                          
             }
         self.prepositions = {
@@ -45,13 +50,15 @@ class Language(object):
              "atonic_plural" : { "nos", "os", "se", "lo", "la", "les", "los" },
              "reflexive": { "me", "nos", "te", "os", "se"},
              "posesive" : { "mío", "mía", "míos", "mías", "tuyo", "tuya", "tuyos", "tuyas", "suyo", "suya", "suyos", "suyas", "nuestro", "nuestra", "nuestros", "nuestras", "vuestro", "vuestra", "vuestros", "vuestras"  },
+             "posesive" : { "mío", "mía", "míos", "mías", "tuyo", "tuya", "tuyos", "tuyas", "suyo", "suya", "suyos", "suyas", "nuestro", "nuestra", "nuestros", "nuestras", "vuestro", "vuestra", "vuestros", "vuestras"  },
              "demostrative" : { "éste", "ésta", "esto", "éstos", "éstas", "ése", "ésa", "eso", "ésos", "ésas", "aquel", "aquella", "aquello", "aquéllos", "aquéllas"   },
              "relative" : { "que", "cual", "cuales", "donde", "quien", "quienes", "cuyo", "cuya", "cuyos", "cuyas" },
              "numeral" : { "doble", "triple", "cuádruple" }
              }
         self.other = { 
               "synthagmal": { "al", "del" },
-              "logic" : { "si" }
+              "logic" : { "si" },
+              "lownum" : { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"}
               }
         self.commonverbs = {
             "estar" : { "estar", "estando", "estado", "estoy", "estás", "está", "estamos", "están", "esta", "estáis", 
@@ -77,12 +84,15 @@ class Language(object):
                                             
             }
         
+            
     
     
     def isNounOrVerb(self, text):
         isNV = True
         text = text.lower()
+        isNV = isNV and (not (self.isInCategory(self.other, text)))
         isNV = isNV and (not (self.isInCategory(self.adverbs, text)))
+        isNV = isNV and (not (self.isInCategory(self.adjetives, text)))
         isNV = isNV and (not (self.isInCategory(self.articles, text)))
         isNV = isNV and (not (self.isInCategory(self.conjuntions, text)))
         isNV = isNV and (not (self.isInCategory(self.prepositions, text)))
@@ -98,3 +108,57 @@ class Language(object):
                     return True
         return False
         
+
+    def languageEntropy(self, word):
+        tautosilabs = {"pr", "br", "fr", "tr", "dr", "kr", "gr", "pl", "bl", "fl", "ti", "kl", "gl" }
+        ends = "jxhu"
+        starts = "xw"
+        ccallowed = { "ll","rr", "cc", "ee","oo" }
+        score = 0
+        if len(word)>4: score +=1
+        if len(word)>8: score +=1
+        if (word!=word.lower()): score += 1
+        word = word.lower()
+        if (word!=self.voidchar(word, u'ñxwk')): score += 1
+        if (word!=self.voidchar(word, u'jáéú')): score += 1
+        if (word!=self.voidchar(word, u'!$%&/()?¡¿?*´')): score += 1
+        if (self.hasCluster(word, tautosilabs)): score += 1
+        if (self.hasStart(word, starts)): score += 1
+        if (self.hasEnding(word, ends)): score += 1
+        if (self.hasDouble(word, ccallowed)): score += 1
+        print "entropy: "+word+" = "+str(score)
+        return score
+           
+    
+    def hasCluster(self, word, clusters):
+        for cluster in clusters:
+            if word.find(cluster):
+                return True
+        return False
+    
+    def voidchar(self, text, chars):
+        for c in list(chars):
+            text.replace(c,'')
+        return text
+    
+    def hasEnding(self, text, chars):
+        for c in list(chars):
+            if c==text[-1]:
+                return True
+        return False   
+    
+    def hasStart(self, text, chars):
+        for c in list(chars):
+            if c==text[0]:
+                return True
+        return False
+    
+    def hasDouble(self, text, but):
+        for i in range(len(text)-1):
+            if text[i]==text[i+1]:
+                dd = text[i:i+1]
+                if dd in but:
+                    return True
+        return False
+    
+            

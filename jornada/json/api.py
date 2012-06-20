@@ -14,7 +14,7 @@ import constants as const
 
 class Api(object):
 
-    def __init__(self, family="", section="", mtype="", txt="", noteid="", year="", month="", day="", detail=""):
+    def __init__(self, family="", section="", mtype="", txt="", noteid="", year="", month="", day="", detail="", richness="html"):
         self.DETAIL_NO_CONTENT = "nocontent"
         self.DETAIL_MINIMAL = "minimal"
         self.family = family if family != None else ""
@@ -26,6 +26,7 @@ class Api(object):
         self.month = month if month != None else ""
         self.day = day if day != None else ""
         self.detail = detail if detail != None else ""
+        self.richness = richness if (richness != None or richness == "") else "html"
         self.json = "" 
         self.result = ""
         print detail
@@ -48,8 +49,8 @@ class Api(object):
             if len(self.json)>1:
                 self.runrequest()
             else:
-                self.notbeenfound()  
-				#self.asyncInvokeDailyFileGeneration()
+                self.notbeenfound()
+            #self.asyncInvokeDailyFileGeneration()
         
     def getDate(self):
         now = dayt.now()
@@ -73,8 +74,7 @@ class Api(object):
     def asyncInvokeDailyFileGeneration(self):
         pool = Pool(processes=1)
         pool.apply_async(Impresa(), [], None) 
-		
-        
+                
     def getjson(self):
         filename = const.SAVING_ROUTE + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
         if os.path.isfile(filename):
@@ -133,20 +133,40 @@ class Api(object):
                         include = False
                 if include:        
                     #edit note
-                    if self.detail != "":
-                        if self.detail == self.DETAIL_NO_CONTENT:
-                            del thisNote['content']
-                        if self.detail == self.DETAIL_MINIMAL:
-                            del thisNote['content']
-                            del thisNote['summary']
-                            del thisNote['edSummary']
-                            del thisNote['abstract']
+                    #dispatch richness
+                    if thisNote.get('content'):
+                        thisNote['summary']=self.dispatchRichness(thisNote['summary'])
+                        thisNote['edSummary']=self.dispatchRichness(thisNote['edSummary'])
+                        thisNote['content']['title']=self.dispatchRichness(thisNote['content']['title'])
+                        thisNote['content']['hedline']=self.dispatchRichness(thisNote['content']['hedline'])
+                        thisNote['content']['abstract']=self.dispatchRichness(thisNote['content']['abstract'])
+                        thisNote['content']['text']=self.dispatchRichness(thisNote['content']['text'])
+                        
+                        #dispatch detail
+                        if self.detail != "":
+                            if self.detail == self.DETAIL_NO_CONTENT:
+                                del thisNote['content']
+                            if self.detail == self.DETAIL_MINIMAL:
+                                del thisNote['content']
+                                del thisNote['summary']
+                                del thisNote['edSummary']
+                                del thisNote['abstract']
                     newcontent.append(thisNote)
             mjson[0]["content"] = newcontent
             self.result =  json.dumps(mjson)
         except Exception as e:
             self.requesterror(e.__str__()) 
-            
+    
+    def dispatchRichness(self, jItem):
+        if isinstance(jItem, dict):
+            level = self.richness
+            if level == all:
+                return jItem
+            else:
+                nItem = jItem[level]
+                return nItem     
+        return jItem
+        
             
     def getResult(self):
         return self.result  

@@ -41,58 +41,62 @@ class Impresa(parsing):
         self.superfamily = "portada"
         
         jItems = []
+        self.Entropy = defaultdict(int)
         self.jAnalytics = []
         self.jHeuristics = []
         self.jMaster = defaultdict(int)
-        try:
-            jItems = self.getNoteItemsFromDir(jItems)
-            jItems = self.getNoteItemsFromPortada(jItems)
-            jItems = self.getNoteItemsFromContra(jItems)
-            jItems = self.getNoteItemsFromCartones(jItems)
-            jItems = self.getNoteItemsFromAudioN(jItems)
-        except Exception as e:
-            status="error"
-            jItems = []
-            self.dumpErrorLog(e)
-        else:    
-            date = "" + str(self.year) + "/" + str(self.month) + "/" + str(self.year)
-            #orderedItems = OrderedDict(sorted(jItems,  key=lambda k: k.iteritems()))
-            jOmNews = { 
-               "title": const.DELIVERY_DESCRIPTION,
-               "publication": const.PUB_NAME,
-               "isbn": const.PUB_ISBN,
-               "periodicity": const.PUB_PERIODICITY,
-               "gentime": const.PUB_GENTIME,
-               "timezone": const.LOCALE_TIMEZONE,
-               "company": const.COMPANY_NAME,
-               "country": const.LOCALE_COUNTRY,
-               "region": const.LOCALE_REGION,
-               "language":const.LOCALE_LANG,
-               "culture":const.LOCALE_CULTURE,
-               "encoding":const.LOCALE_ENCODING,
-               "webpage": const.PUB_WEB,
-               "date": date,
-               "scope" : const.PUB_SCOPE,
-               "alias": const.DELIVERY_ALIAS, 
-               "contentKind": const.DELIVERY_KIND,
-               "status" : status,   
-               "content": jItems,
-               }
-            self.dumpJsonItems([jOmNews])
-            try:
-                '''Experimental'''
-                #heur = Heuristics('esp')
-                #heur.findProbableAdjacent(self.jMaster,4,2,self.jHeuristics)
-                ''''''
-                mtitle = { "title": date }
-                environ = { "environment" : self.jHeuristics}
-                masterw = { "general" : self.jMaster }
-                self.jAnalytics.append(mtitle)
-                self.jAnalytics.append(masterw)
-                self.jAnalytics.append(environ)
-                self.dumpJsonHeuristics(self.jAnalytics)
-            except Exception as error2:
-                self.dumpErrorLog(error2)
+        
+        #try:
+        jItems = self.getNoteItemsFromDir(jItems)
+        jItems = self.getNoteItemsFromPortada(jItems)
+        jItems = self.getNoteItemsFromContra(jItems)
+        jItems = self.getNoteItemsFromCartones(jItems)
+        jItems = self.getNoteItemsFromAudioN(jItems)
+    #except Exception as e:
+        #status="error"
+        #jItems = []
+        #self.dumpErrorLog(e)
+    #else:    
+        date = "" + str(self.year) + "/" + str(self.month) + "/" + str(self.year)
+        #orderedItems = OrderedDict(sorted(jItems,  key=lambda k: k.iteritems()))
+        jOmNews = { 
+           "title": const.DELIVERY_DESCRIPTION,
+           "publication": const.PUB_NAME,
+           "isbn": const.PUB_ISBN,
+           "periodicity": const.PUB_PERIODICITY,
+           "gentime": const.PUB_GENTIME,
+           "timezone": const.LOCALE_TIMEZONE,
+           "company": const.COMPANY_NAME,
+           "country": const.LOCALE_COUNTRY,
+           "region": const.LOCALE_REGION,
+           "language":const.LOCALE_LANG,
+           "culture":const.LOCALE_CULTURE,
+           "encoding":const.LOCALE_ENCODING,
+           "webpage": const.PUB_WEB,
+           "date": date,
+           "scope" : const.PUB_SCOPE,
+           "alias": const.DELIVERY_ALIAS, 
+           "contentKind": const.DELIVERY_KIND,
+           "status" : status,   
+           "content": jItems,
+           }
+        self.dumpJsonItems([jOmNews])
+        
+        lang = ESP()
+        for k,v in self.jMaster.iteritems():
+            if lang.languageEntropy(k)>2:
+                self.Entropy[k]=v
+        
+        try:            
+            self.jAnalytics = { 
+                    "title": date,
+                    "general" : self.jMaster,
+                    "entropy" : self.Entropy,
+                    "environment" : self.jHeuristics
+                    }
+            self.dumpJsonHeuristics(self.jAnalytics)
+        except Exception as error2:
+            self.dumpErrorLog(error2)
     
     def getHttpResourceString(self, res):
         a = ""; s = ""
@@ -139,7 +143,6 @@ class Impresa(parsing):
         r1 = conn.getresponse()
         print r1.status, r1.reason
         r = r1.read()
-        #print r
         return r
 
     def getHttpNoteResourceString(self, res, id):
@@ -171,7 +174,7 @@ class Impresa(parsing):
         return r
             
     def dumpJsonItems(self, jItems):
-        j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=True)
+        j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
         filename = const.SAVING_ROUTE + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
         f = open(filename, 'w')
         f.write(j)
@@ -226,6 +229,36 @@ class Impresa(parsing):
         if mtype == "Opinion":
             return "columna"
         return mtype
+    
+    def getImagesObject(self, medialst):
+        imgs = []
+        url = ""; snap=""; alt = ""; caption = ""; header =""; author = ""; ikind=""; iid =""
+        ikind="content"
+        for mediaitem in medialst:
+            if mediaitem.getAttribute('media-type') == 'image':
+                for innermediaitem in mediaitem.childNodes:
+                    if innermediaitem.nodeName == 'media-reference':
+                        iid = innermediaitem.getAttribute('id')
+                        alt = innermediaitem.getAttribute('alternate-text') 
+                    if innermediaitem.nodeName == 'media-caption':
+                        caption = self.getText(innermediaitem.childNodes)
+                    if innermediaitem.nodeName == 'media-producer':
+                        author = self.getText(innermediaitem.childNodes)
+            url = self.getImgUrl(iid)
+            snap = self.getSnapUrl(iid)
+            img = {
+                   "id":iid,
+                   "url":url,
+                   "snap":snap,
+                   "alt":alt,
+                   "caption":caption,
+                   "header":header,
+                   "author":author,
+                   "kind":ikind,
+                   }
+            imgs.append(img)
+        return imgs
+        
         
     def getNoteItemsFromDir(self, jItems):
         family = "dir"
@@ -242,71 +275,39 @@ class Impresa(parsing):
             type = node.getAttribute('type')
             type = self.getCorrectedType(type)
             
-            titlelst = node.getElementsByTagName('title')
-            title = ""
-            for titles in titlelst:
-                title = self.getText(titles.childNodes)
-            print 'noteid '   + nodeid 
+            page = self.getRecursiveText(node.getElementsByTagName('page'))
+            order = self.getRecursiveText(node.getElementsByTagName('ord'))
             
-            print "title: "  + title   
-            
+            title = self.getRecursiveText(node.getElementsByTagName('title'))
+
             firstplst = node.getElementsByTagName('firstp')
-            summary = self.getArray(firstplst)
+            summary = {
+                "html" :  self.getHtmlFromParragraphs(firstplst),
+                "plain" : self.getRecursiveText(firstplst),
+                "list" : self.getListItems(firstplst)
+            }
             
-            serieslst = node.getElementsByTagName('series')
-            series = ""
-            for  seriesitem in serieslst:
-                series += self.getText(seriesitem.childNodes)
+            series = self.getRecursiveText(node.getElementsByTagName('series'))       
+            author = self.getRecursiveText(node.getElementsByTagName('author'))        
+            date = self.getRecursiveText(node.getElementsByTagName('date'))           
             
-            authorlst = node.getElementsByTagName('author')
-            author = ""
-            for authoritem in authorlst:
-                author = self.getText(authoritem.childNodes)
-            
-            datelst = node.getElementsByTagName('date')
-            date = ""
-            for dateitem in datelst:
-                date = self.getText(dateitem.childNodes)
+            abstractlst = xmldoc.getElementsByTagName('abstract')[0].childNodes
+            abstract = {
+                "html" :  self.getHtmlFromParragraphs(abstractlst),
+                "plain" : self.getRecursiveText(abstractlst),
+                "list" : self.getListItems(abstractlst)
+            }
             
             medialst = node.getElementsByTagName('media')
-            imgs = []
-            url = ""; snap=""; alt = ""; caption = ""; header =""; author = ""; ikind=""; iid =""
-            ikind="content"
-            for mediaitem in medialst:
-                if mediaitem.getAttribute('media-type') == 'image':
-                    for innermediaitem in mediaitem.childNodes:
-                        if innermediaitem.nodeName == 'media-reference':
-                            iid = innermediaitem.getAttribute('id')
-                            alt = innermediaitem.getAttribute('alternate-text') 
-                        if innermediaitem.nodeName == 'media-caption':
-                            caption = self.getText(innermediaitem.childNodes)
-                        if innermediaitem.nodeName == 'media-producer':
-                            author = self.getText(innermediaitem.childNodes)
-                url = self.getImgUrl(iid)
-                snap = self.getSnapUrl(iid)
-                img = {
-                       "id":iid,
-                       "url":url,
-                       "snap":snap,
-                       "alt":alt,
-                       "caption":caption,
-                       "header":header,
-                       "author":author,
-                       "kind":ikind,
-                       }
-                imgs.append(img)
-                
-            abstractlst = node.getElementsByTagName('abstract')
-            abstract = self.getArray(abstractlst)
-            #for abstractitem in abstractlst:
-                #abstract += self.getText(abstractitem.childNodes) 
+            imgs = self.getImagesObject(medialst)
                 
             #EACH NOTE PARSING
             notecontent = self.getNoteContent(nodeid)
             
             jItem = {
                      "id": nodeid,
-                     "order":x,
+                     "page":page,
+                     "order":order,
                      "family": family,
                      "section": section,
                      "type": type,
@@ -327,34 +328,29 @@ class Impresa(parsing):
     
         #RAYUELA
         rayuela = xmldoc.getElementsByTagName('Rayuela')[0]
-        nodeid = ""
-        noteXmlUrl =  ""
         section = "rayuela"
         stype = "bullet"
         title = self.getRecursiveText(rayuela)
-        summary = []
-        series = "rayuela"
-        author = ""
-        date = ""
-        imgs = []
+
         abstract = ""    
         new = {
-             "id": nodeid,
+             "id": "",
+             "page": "0",
              "order": 0,
-             "family": family,
-             "section": section,
+             "family": "contra",
+             "section": "rayuela",
              "type": stype,
-             "noteXmlUrl": noteXmlUrl,
+             "noteXmlUrl": "",
              "title": title,
              "edTitle": title,
-             "summary": summary,
-             "edSummary": summary,
-             "abstract": abstract,
-             "series": series,
-             "author": author,
-             "date": date,
+             "summary": [],
+             "edSummary": [],
+             "abstract": "",
+             "series": "",
+             "author": "",
+             "date": "",
              "audio":"",
-             "images": imgs,
+             "images": [],
              "content": []
         }
         jItems.append(new)
@@ -380,67 +376,23 @@ class Impresa(parsing):
             type = node.getAttribute('type')
             type = self.getCorrectedType(type)
             
-            titlelst = node.getElementsByTagName('title')
-            title = ""
-            for titles in titlelst:
-                title = self.getText(titles.childNodes)
-            print 'noteid '   + nodeid    
-            
-            summary = []
+            title = self.getRecursiveText(node.getElementsByTagName('title'))
             firstplst = node.getElementsByTagName('firstp')
-            summary = self.getArray(firstplst)
-            #for firstp in firstplst:
-                #for innerfirsts in firstp.childNodes:
-                    #summary.append(self.getText(innerfirsts.childNodes))
+            summary = {
+                "html" :  self.getHtmlFromParragraphs(firstplst),
+                "plain" : self.getRecursiveText(firstplst),
+                "list" : self.getListItems(firstplst)
+            }      
+            series = self.getRecursiveText(node.getElementsByTagName('series'))       
+            author = self.getRecursiveText(node.getElementsByTagName('author'))        
+            date = self.getRecursiveText(node.getElementsByTagName('date'))
 
-            serieslst = node.getElementsByTagName('series')
-            series = ""
-            for  seriesitem in serieslst:
-                series += self.getText(seriesitem.childNodes)
-            
-            authorlst = node.getElementsByTagName('author')
-            author = ""
-            for authoritem in authorlst:
-                author = self.getText(authoritem.childNodes)
-            
-            datelst = node.getElementsByTagName('date')
-            date = ""
-            for dateitem in datelst:
-                date = self.getText(dateitem.childNodes)
-            
-            medialst = node.getElementsByTagName('media')
-            imgs = []
-            url = ""; snap=""; alt = ""; caption = ""; header =""; author = ""; ikind=""; iid =""
-            ikind = "main"
-            for mediaitem in medialst:
-                if mediaitem.getAttribute('media-type') == 'image':
-                    for innermediaitem in mediaitem.childNodes:
-                        if innermediaitem.nodeName == 'media-reference':
-                            iid = innermediaitem.getAttribute('id')
-                            alt = innermediaitem.getAttribute('alternate-text') 
-                        if innermediaitem.nodeName == 'media-caption':
-                            caption = self.getText(innermediaitem.childNodes)
-                        if innermediaitem.nodeName == 'media-producer':
-                            author = self.getText(innermediaitem.childNodes)
-                url = self.getImgUrl(iid)
-                snap = self.getSnapUrl(iid)
-                img = {
-                       "id":iid,
-                       "url":url,
-                       "snap":snap,
-                       "alt":alt,
-                       "caption":caption,
-                       "header":header,
-                       "author":author,
-                       "kind":ikind
-                       }
-                imgs.append(img)
-                
             abstractlst = node.getElementsByTagName('abstract')
             abstract = self.getArray(abstractlst)
-            #for abstractitem in abstractlst:
-                #abstract += self.getText(abstractitem.childNodes)
-                
+            
+            medialst = node.getElementsByTagName('media')
+            imgs = self.getImagesObject(medialst)
+                      
             for i in xrange(len(jItems)-1,-1,-1):
                 if jItems[i].get('id') == nodeid:
                     preimgs = jItems[i].get('images')
@@ -456,7 +408,8 @@ class Impresa(parsing):
                         preimgs = imgs
                     new = {
                          "id": nodeid,
-                         "order": x,
+                         "page": jItems[i].get('page'),
+                         "order": jItems[i].get('order'),
                          "family": family,
                          "section": section,
                          "type": type,
@@ -507,6 +460,7 @@ class Impresa(parsing):
             abstract = ""    
             new = {
                  "id": nodeid,
+                 "page": "0",
                  "order": y,
                  "family": family,
                  "section": section,
@@ -543,63 +497,22 @@ class Impresa(parsing):
             type = node.getAttribute('type')
             type = self.getCorrectedType(type)
             
-            titlelst = node.getElementsByTagName('title')
-            title = ""
-            for titles in titlelst:
-                title = self.getText(titles.childNodes)
-            print 'noteid '   + nodeid    
-            
-            summary = []
+            title = self.getRecursiveText(node.getElementsByTagName('title'))
             firstplst = node.getElementsByTagName('firstp')
-            summary = self.getArray(firstplst)
-
-            serieslst = node.getElementsByTagName('series')
-            series = ""
-            for  seriesitem in serieslst:
-                series += self.getText(seriesitem.childNodes)
+            summary = {
+                "html" :  self.getHtmlFromParragraphs(firstplst),
+                "plain" : self.getRecursiveText(firstplst),
+                "list" : self.getListItems(firstplst)
+            }      
+            series = self.getRecursiveText(node.getElementsByTagName('series'))       
+            author = self.getRecursiveText(node.getElementsByTagName('author'))        
+            date = self.getRecursiveText(node.getElementsByTagName('date'))
             
-            authorlst = node.getElementsByTagName('author')
-            author = ""
-            for authoritem in authorlst:
-                author = self.getText(authoritem.childNodes)
-            
-            datelst = node.getElementsByTagName('date')
-            date = ""
-            for dateitem in datelst:
-                date = self.getText(dateitem.childNodes)
-            
-            medialst = node.getElementsByTagName('media')
-            imgs = []
-            url = ""; snap=""; alt = ""; caption = ""; header =""; author = ""; ikind=""; iid =""
-            ikind = "main"
-            for mediaitem in medialst:
-                if mediaitem.getAttribute('media-type') == 'image':
-                    for innermediaitem in mediaitem.childNodes:
-                        if innermediaitem.nodeName == 'media-reference':
-                            iid = innermediaitem.getAttribute('id')
-                            alt = innermediaitem.getAttribute('alternate-text') 
-                        if innermediaitem.nodeName == 'media-caption':
-                            caption = self.getText(innermediaitem.childNodes)
-                        if innermediaitem.nodeName == 'media-producer':
-                            author = self.getText(innermediaitem.childNodes)
-                url = self.getImgUrl(iid)
-                snap = self.getSnapUrl(iid)
-                img = {
-                       "id":iid,
-                       "url":url,
-                       "snap":snap,
-                       "alt":alt,
-                       "caption":caption,
-                       "header":header,
-                       "author":author,
-                       "kind":ikind
-                       }
-                imgs.append(img)
-                
             abstractlst = node.getElementsByTagName('abstract')
             abstract = self.getArray(abstractlst)
-            #for abstractitem in abstractlst:
-                #abstract += self.getText(abstractitem.childNodes) + '\n'
+            
+            medialst = node.getElementsByTagName('media')
+            imgs = self.getImagesObject(medialst)
                 
             for i in xrange(len(jItems)-1,-1,-1):
                 if jItems[i].get('id') == nodeid:
@@ -608,16 +521,15 @@ class Impresa(parsing):
                         for ii in xrange(len(preimgs)-1,-1,-1):
                             for iii in xrange(len(imgs)-1,-1,-1):
                                 if preimgs[ii].get('id') == imgs[iii].get('id'):
-                                    preimgs[ii] = imgs[iii]
-                                    #print "-------------------merged images " + imgs[iii].get('id')      
+                                    preimgs[ii] = imgs[iii] 
                                 else:
                                     preimgs.append(imgs[iii])
-                                    #print "-------------------not merged " + imgs[iii].get('id')
                     else:
                         preimgs = imgs
                     new = {
                          "id": nodeid,
-                         "order": x,
+                         "page": jItems[i].get('page'),
+                         "order": jItems[i].get('order'),
                          "family": family,
                          "section": section,
                          "type": type,
@@ -669,6 +581,7 @@ class Impresa(parsing):
             abstract = ""    
             new = {
                  "id": nodeid,
+                 "page": "0",
                  "order": y,
                  "family": family,
                  "section": section,
@@ -743,6 +656,7 @@ class Impresa(parsing):
             
             jItem = {
                          "id": curl,
+                         "page": "0",
                          "order": x,
                          "family": family,
                          "section": section,
@@ -757,7 +671,8 @@ class Impresa(parsing):
                          "author": cauthor,
                          "date": "",
                          "audio":"",
-                         "images": img
+                         "images": img,
+                         "content": []
                     }              
                             
             jItems.append(jItem)
@@ -778,31 +693,10 @@ class Impresa(parsing):
             enclosure = node.getElementsByTagName('enclosure')[0]
             audio = enclosure.getAttribute('url')
             print 'audio '   + audio    
-                          
-            for i in xrange(len(jItems)-1,-1,-1):
-                if jItems[i].get('id') == guid:
-                    new = {
-                         "id": jItems[i].get('id'),
-                         "order": jItems[i].get('order'),
-                         "family": jItems[i].get('family'),
-                         "section": jItems[i].get('section'),
-                         "type": jItems[i].get('type'),
-                         "noteXmlUrl": jItems[i].get('noteXmlUrl'),
-                         "title": jItems[i].get('title'),
-                         "edTitle": jItems[i].get('edTitle'),
-                         "summary": jItems[i].get('summary'),
-                         "edSummary": jItems[i].get('edSummary'),
-                         "abstract": jItems[i].get('abstract'),
-                         "series": jItems[i].get('series'),
-                         "author": jItems[i].get('author'),
-                         "date": jItems[i].get('date'),
-                         "audio":audio,
-                         "images": jItems[i].get('images'),
-                         "content": jItems[i].get('content'),
-                         
-                    }
-                    jItems[i] = new
-              
+            
+            for items in jItems:
+                if items['id']==guid:
+                    items['audio']=audio
         return jItems
     
     def getNoteContent(self, noteid):
@@ -812,89 +706,45 @@ class Impresa(parsing):
         filestr = self.getHttpNoteResourceString('articulo', noteid)
         xmldoc = minidom.parseString(filestr)
         print "noteid::::"+noteid
-        #title = ""
-        title = self.getRecursiveText(xmldoc.getElementsByTagName('title')[0].childNodes[0])
-        print 'head ' + title
         
-        hedline = []
+        titlelst  = xmldoc.getElementsByTagName('title')[0].childNodes
+        title = {
+            "html" :  self.getHtmlFromParragraphs(titlelst),
+            "plain" : self.getRecursiveText(titlelst),
+            "list" : self.getListItems(titlelst)
+                 }
+        self.appendNodeToHeuristics(heur,titlelst, jHNoteContent, jHNoteKeywords)
+        
         hedlinelst = xmldoc.getElementsByTagName('hedline')[0].childNodes
-        for hedlineitem in hedlinelst:
-            hedlineitxt = ""
-            if hedlineitem.nodeName == 'hl1':
-                hedlineitxt = self.getRecursiveText(hedlineitem)
-            if hedlineitem.nodeName == 'hl2':
-                hedlineitxt = self.getRecursiveText(hedlineitem)
-            if hedlineitxt != '':
-                if hedlineitxt != None:
-                    hedline.append(hedlineitxt)
-                    print "hedline " + hedlineitxt
-        
+        hedline = {
+            "html" :  self.getHtmlFromParragraphs(hedlinelst),
+            "plain" : self.getRecursiveText(hedlinelst),
+            "list" : self.getListItems(hedlinelst)         
+                }
+        self.appendNodeToHeuristics(heur,hedlinelst, jHNoteContent, jHNoteKeywords)        
         
         byline = self.getRecursiveText(xmldoc.getElementsByTagName('byline')[0].childNodes[0])
-        #byline = xmldoc.getElementsByTagName('byline')[0].childNodes[0].nodeValue
         
-        abstract = self.getArray(xmldoc.getElementsByTagName('abstract')[0].childNodes)
-        #abslst = xmldoc.getElementsByTagName('abstract')[0].childNodes
-        #for absitem in abslst:
-            #absitxt = ""
-            #absitxt = self.getText(absitem)
-            #if absitxt != None:
-                #abstract.append(absitxt)
-                #print 'abstract ' + absitxt
+        abstractlst = xmldoc.getElementsByTagName('abstract')[0].childNodes
+        abstract = {
+            "html" :  self.getHtmlFromParragraphs(abstractlst),
+            "plain" : self.getRecursiveText(abstractlst),
+            "list" : self.getListItems(abstractlst)
+            }
+        self.appendNodeToHeuristics(heur,abstractlst, jHNoteContent, jHNoteKeywords)
         
-        parragraphs = []
         bodycontent = xmldoc.getElementsByTagName('body.content')[0].childNodes
-        #body = xmldoc.getElementsByTagName('body.content')[0]
-        #text = bodycontent.toxml()
-        text = ""
-        for bodycitem in bodycontent:
-            if bodycitem.nodeName=='p':
-                text += bodycitem.toxml()
-                inp = ""
-                inp = self.getRecursiveText(bodycitem)
-                if inp != None:
-                    if inp != '':
-                        jHNoteContent = heur.matchTextToList(inp, jHNoteContent)
-                        jHNoteKeywords = heur.matchTextToDict(inp, jHNoteKeywords)
-                        parragraphs.append(inp)      
-                    
-        imgs = []
-        medialst = xmldoc.getElementsByTagName('media')
-        url = ""; snap=""; alt = ""; caption = ""; header =""; author = ""; ikind=""; iid =""
-        ikind="content"
-        for mediaitem in medialst:
-            if mediaitem.getAttribute('media-type') == 'image':
-                for innermediaitem in mediaitem.childNodes:
-                    if innermediaitem.nodeName == 'media-reference':
-                        iid = innermediaitem.getAttribute('id')
-                        alt = innermediaitem.getAttribute('alternate-text') 
-                    if innermediaitem.nodeName == 'media-caption':
-                        caption = self.getText(innermediaitem.childNodes)
-                    if innermediaitem.nodeName == 'media-producer':
-                        author = self.getText(innermediaitem.childNodes)
-            url = self.getImgUrl(iid)
-            snap = self.getSnapUrl(iid)
-            img = {
-                   "id":iid,
-                   "url":url,
-                   "snap":snap,
-                   "alt":alt,
-                   "caption":caption,
-                   "header":header,
-                   "author":author,
-                   "kind":ikind,
-                   }
-            imgs.append(img) 
+        text = {
+            "html" :  self.getHtmlFromParragraphs(bodycontent),
+            "plain" : self.getRecursiveText(bodycontent),
+            "list" : self.getListItems(bodycontent)       
+            }
+        self.appendNodeToHeuristics(heur,bodycontent, jHNoteContent, jHNoteKeywords)
             
-        jHNoteKeywords = heur.matchTextToDict(title, jHNoteKeywords)
-        jHNoteKeywords = heur.matchArrayToDict(hedline, jHNoteKeywords) 
-        jHNoteKeywords = heur.matchTextToDict(byline, jHNoteKeywords)
-        jHNoteKeywords = heur.matchArrayToDict(abstract, jHNoteKeywords)
-        
-        jHNoteContent = heur.matchTextToList(title, jHNoteContent)                         
-        jHNoteContent = heur.matchArrayToList(hedline, jHNoteContent)
-        jHNoteContent = heur.matchTextToList(byline, jHNoteContent)
-        jHNoteContent = heur.matchArrayToList(abstract, jHNoteContent)
+        medialst = xmldoc.getElementsByTagName('media')
+        imgs = self.getImagesObject(medialst)
+            
+
         jHNote = { noteid : { "words" : jHNoteContent, "freqs" : jHNoteKeywords } }
         self.jMaster = heur.appendToMaster(4,self.jMaster,jHNoteKeywords)
         self.jHeuristics.append(jHNote)
