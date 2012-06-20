@@ -23,7 +23,7 @@ def application(environ, start_response):
     month = escape(parameters['month'][0]) if 'month' in parameters else ""
     day = escape(parameters['day'][0]) if 'day' in parameters else ""
     detail = escape(parameters['detail'][0]) if 'detail' in parameters else ""
-	richness = escape(parameters['richness'][0]) if 'richness' in parameters else ""
+    richness = escape(parameters['richness'][0]) if 'richness' in parameters else ""
     thisapi = Api(family,section,mtype,txt,noteid,year,month,day,detail,richness)
     output = thisapi.getResult()
     response_headers = [('Content-type', 'application/json'),
