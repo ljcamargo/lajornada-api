@@ -47,6 +47,6 @@ class Language(object):
         if re.search(r'[%s]$' % self.ends, word, re.IGNORECASE): score += 1
         if re.search(r'([^%s])\1' % '|'.join(self.ccallowed), word, re.IGNORECASE): score += 1
         
-        if DEBUG: print 'entrpy: %s = %i' % (word, score) 
+        if DEBUG: print u'entrpy: %s = %i' % (word, score) 
         
         return score
