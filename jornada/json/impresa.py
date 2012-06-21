@@ -171,7 +171,6 @@ class Impresa(parsing):
         r1 = conn.getresponse()
         print r1.status, r1.reason
         r = r1.read()
-        print r
         return r
             
     def dumpJsonItems(self, jItems):
@@ -621,23 +620,19 @@ class Impresa(parsing):
             curl=""
             urllst = node.getElementsByTagName('url')[0].childNodes[0]
             curl = urllst.nodeValue
-            print 'url '   + curl    
             
             cthumb=""
             thumblst = node.getElementsByTagName('thumbnail')[0].childNodes[0]   
             cthumb = thumblst.nodeValue
-            print 'thumb '   + cthumb    
             
             cauthor=""
             authorlst = node.getElementsByTagName('author')[0].childNodes[0]   
             cauthor = authorlst.nodeValue
-            print 'author '   + cauthor    
             
             ccaption=""
             captionlst = node.getElementsByTagName('caption')[0].childNodes[0]   
             ccaption = captionlst.nodeValue
-            print 'caption '   + ccaption    
-
+            
             curl = self.getImgOriginalUrl(curl)
             cthumb = self.getImgOriginalUrl(cthumb)
             
@@ -689,12 +684,10 @@ class Impresa(parsing):
             guid=""
             guidlst = node.getElementsByTagName('guid')[0].childNodes[0]
             guid = guidlst.nodeValue
-            print 'guid '   + guid    
             
             audio=""
             enclosure = node.getElementsByTagName('enclosure')[0]
             audio = enclosure.getAttribute('url')
-            print 'audio '   + audio    
             
             for items in jItems:
                 if items['id']==guid:
@@ -707,7 +700,6 @@ class Impresa(parsing):
         jHNoteKeywords = defaultdict(int)
         filestr = self.getHttpNoteResourceString('articulo', noteid)
         xmldoc = minidom.parseString(filestr)
-        print "noteid::::"+noteid
         
         titlelst  = xmldoc.getElementsByTagName('title')[0].childNodes
         title = {

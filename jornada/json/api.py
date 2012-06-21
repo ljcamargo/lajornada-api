@@ -29,7 +29,6 @@ class Api(object):
         self.richness = richness if (richness != None or richness == "") else "html"
         self.json = "" 
         self.result = ""
-        print detail
          
         if self.year=="" or self.month=="" or self.day=="":
             self.getDate()
@@ -78,10 +77,9 @@ class Api(object):
     def getjson(self):
         filename = const.SAVING_ROUTE + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
         if os.path.isfile(filename):
-            print filename
+            print "getting file: "+filename
             f = open(filename, 'r')
             self.json = f.read()
-            ##print self.json
             f.close()
         else:
             print "filenotfound "+filename
@@ -173,7 +171,7 @@ class Api(object):
 
                       
 if __name__ == '__main__':
-    miapi =Api("","","","","","","","","nocontent")
+    miapi =Api("","","","","","","","","nocontent","plain")
     print miapi.getResult()
     
     

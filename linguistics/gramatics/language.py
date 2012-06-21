@@ -10,76 +10,76 @@ class Language(object):
     def __init__(self):
         #GRAMMAR CATEGORIES
         self.articles = {  
-            "determinate" : { "el", "la", "los", "las" },
-            "undeterminate" : { "un", "unos", "una", "unas" }                          
+            u"determinate" : { u"el", u"la", u"los", u"las" },
+            u"undeterminate" : { u"un", u"unos", u"una", u"unas" }                          
             }
         self.adjetives = {  
-            "posesive" : { "mi", "mis", "tu", "tus", "su", "sus", "nuestro", "nuestros", "nuestra", "nuestras", "vuestro", "vuestros", "vuestra", "vuestras" },
-            "undeterminate" : { "un", "unos", "una", "unas" }                          
+            u"posesive" : { u"mi", u"mis", u"tu", u"tus", u"su", u"sus", u"nuestro", u"nuestros", u"nuestra", u"nuestras", u"vuestro", u"vuestros", u"vuestra", u"vuestras" },
+            u"undeterminate" : { u"un", u"unos", u"una", u"unas" }                          
             }
         self.prepositions = {
-            "formal" : { "a", "ante", "bajo", "cabe", "con", "contra", "de", "desde", "en", "entre", "hacia", "hasta", "para", "por", "según", "sin", "so", "sobre", "tras" },
-            "value" : { "durante", "mediante", "excepto", "salvo", "incluso", "más", "menos" },
-            "phrasal" : { }                
+            u"formal" : { u"a", u"ante", u"bajo", u"cabe", u"con", u"contra", u"de", u"desde", u"en", u"entre", u"hacia", u"hasta", u"para", u"por", u"según", u"sin", u"so", u"sobre", u"tras" },
+            u"value" : { u"durante", u"mediante", u"excepto", u"salvo", u"incluso", u"más", u"menos" },
+            u"phrasal" : { }                
             }
         self.adverbs = {
-            "place" : { "aquí", "allí", "ahí", "allá", "acá", "arriba", "abajo", "cerca", "lejos", "delante", "detrás", "encima", "debajo", "enfrente", "atrás", "alrededor" },
-            "time" : { "pronto", "tarde", "temprano", "todavía", "aún", "ya", "ayer", "hoy", "mañana", "siempre", "nunca", "jamás", "próximamente", "prontamente", "anoche", "enseguida", "ahora", "mientras", "antier" },  
-            "mode" : { "bien", "mal", "regular", "despacio", "deprisa", "así", "tal", "como", "aprisa", "adrede", "peor", "mejor", "$mente" },          
-            "grade" : { "muy", "poco", "muy poco", "mucho", "bastante", "más", "menos", "algo", "demasiado", "casi", "sólo", "solamente", "tan", "tanto", "todo", "nada" },
-            "afirmation" : { "sí", "también", "cierto", "ciertamente", "efectivamente", "claro", "exacto", "obvio", "verdaderamente", "seguramente" },
-            "negation" : { "no", "jamás", "nunca", "tampoco", "negativamente" },
-            "doubt" : { "quizá", "quizá", "acaso", "probablemente", "posiblemente", "seguramente", "tal vez", "sin duda", "puede", "puede ser", "a lo mejor" }, 
-            "interrogative_exc" :  { "cuándo", "cómo", "cuánto", "dónde" },
-            "interrogative_rel" :  { "cuando", "como", "cuanto", "donde" },
-            "others" : { "sólo", "solamente", "aun", "inclusive", "además", "únicamente", "incluso", "mismamente", "propiamente", "precisamente", "concretamente; viceversa", "contrariamente", "siquiera", "consecuentemente" },         
+            u"place" : { u"aquí", u"allí", u"ahí", u"allá", u"acá", u"arriba", u"abajo", u"cerca", u"lejos", u"delante", u"detrás", u"encima", u"debajo", u"enfrente", u"atrás", u"alrededor" },
+            u"time" : { u"pronto", u"tarde", u"temprano", u"todavía", u"aún", u"ya", u"ayer", u"hoy", u"mañana", u"siempre", u"nunca", u"jamás", u"próximamente", u"prontamente", u"anoche", u"enseguida", u"ahora", u"mientras", u"antier" },  
+            u"mode" : { u"bien", u"mal", u"regular", u"despacio", u"deprisa", u"así", u"tal", u"como", u"aprisa", u"adrede", u"peor", u"mejor", u"$mente" },          
+            u"grade" : { u"muy", u"poco", u"muy poco", u"mucho", u"bastante", u"más", u"menos", u"algo", u"demasiado", u"casi", u"sólo", u"solamente", u"tan", u"tanto", u"todo", u"nada" },
+            u"afirmation" : { u"sí", u"también", u"cierto", u"ciertamente", u"efectivamente", u"claro", u"exacto", u"obvio", u"verdaderamente", u"seguramente" },
+            u"negation" : { u"no", u"jamás", u"nunca", u"tampoco", u"negativamente" },
+            u"doubt" : { u"quizá", u"quizá", u"acaso", u"probablemente", u"posiblemente", u"seguramente", u"tal vez", u"sin duda", u"puede", u"puede ser", u"a lo mejor" }, 
+            u"interrogative_exc" :  { u"cuándo", u"cómo", u"cuánto", u"dónde" },
+            u"interrogative_rel" :  { u"cuando", u"como", u"cuanto", u"donde" },
+            u"others" : { u"sólo", u"solamente", u"aun", u"inclusive", u"además", u"únicamente", u"incluso", u"mismamente", u"propiamente", u"precisamente", u"concretamente; viceversa", u"contrariamente", u"siquiera", u"consecuentemente" },         
         }
         self.conjuntions = {
-             "coordinant" : { "y", "e", "o", "u", "pero", "sino" },
-             "copulative" : { "y", "e", "ni", "que"},
-             "consecutive" : { "con que", "luego", "tan", "tanto que", "así que", "por lo tanto" },
-             "adversative" : { "sin embargo", "pero", "con todo", "a pesar de", "no obstante", "más bien", "excepto", "salvo", "menos" },
-             "exclusive" : { "sino", "sino que", "antes bien", "al contrario" },
-             "disyuntives" : { "o", "u" },
-             "explicative" : { "osea", "esto es", "es decir", "mejor dicho", "es más" }
+             u"coordinant" : { u"y", u"e", u"o", u"u", u"pero", u"sino" },
+             u"copulative" : { u"y", u"e", u"ni", u"que"},
+             u"consecutive" : { u"con que", u"luego", u"tan", u"tanto que", u"así que", u"por lo tanto" },
+             u"adversative" : { u"sin embargo", u"pero", u"con todo", u"a pesar de", u"no obstante", u"más bien", u"excepto", u"salvo", u"menos" },
+             u"exclusive" : { u"sino", u"sino que", u"antes bien", u"al contrario" },
+             u"disyuntives" : { u"o", u"u" },
+             u"explicative" : { u"osea", u"esto es", u"es decir", u"mejor dicho", u"es más" }
              }
         self.pronouns = {
-             "tonic" : { "yo", "tú", "vos", "usted", "él", "ella", "ello", "nosotros", "nosotras", "ustedes", "vosotros", "vosotras", "ellos", "ellas" },
-             "tonic_prepositional" : { "mi", "conmigo", "tí", "contigo", "sí", "consigo" },
-             "atonic_sing" : { "me", "te", "se", "lo", "la", "le", "se" },
-             "atonic_plural" : { "nos", "os", "se", "lo", "la", "les", "los" },
-             "reflexive": { "me", "nos", "te", "os", "se"},
-             "posesive" : { "mío", "mía", "míos", "mías", "tuyo", "tuya", "tuyos", "tuyas", "suyo", "suya", "suyos", "suyas", "nuestro", "nuestra", "nuestros", "nuestras", "vuestro", "vuestra", "vuestros", "vuestras"  },
-             "posesive" : { "mío", "mía", "míos", "mías", "tuyo", "tuya", "tuyos", "tuyas", "suyo", "suya", "suyos", "suyas", "nuestro", "nuestra", "nuestros", "nuestras", "vuestro", "vuestra", "vuestros", "vuestras"  },
-             "demostrative" : { "éste", "ésta", "esto", "éstos", "éstas", "ése", "ésa", "eso", "ésos", "ésas", "aquel", "aquella", "aquello", "aquéllos", "aquéllas"   },
-             "relative" : { "que", "cual", "cuales", "donde", "quien", "quienes", "cuyo", "cuya", "cuyos", "cuyas" },
-             "numeral" : { "doble", "triple", "cuádruple" }
+             u"tonic" : { u"yo", u"tú", u"vos", u"usted", u"él", u"ella", u"ello", u"nosotros", u"nosotras", u"ustedes", u"vosotros", u"vosotras", u"ellos", u"ellas" },
+             u"tonic_prepositional" : { u"mi", u"conmigo", u"tí", u"contigo", u"sí", u"consigo" },
+             u"atonic_sing" : { u"me", u"te", u"se", u"lo", u"la", u"le", u"se" },
+             u"atonic_plural" : { u"nos", u"os", u"se", u"lo", u"la", u"les", u"los" },
+             u"reflexive": { u"me", u"nos", u"te", u"os", u"se"},
+             u"posesive" : { u"mío", u"mía", u"míos", u"mías", u"tuyo", u"tuya", u"tuyos", u"tuyas", u"suyo", u"suya", u"suyos", u"suyas", u"nuestro", u"nuestra", u"nuestros", u"nuestras", u"vuestro", u"vuestra", u"vuestros", u"vuestras"  },
+             u"posesive" : { u"mío", u"mía", u"míos", u"mías", u"tuyo", u"tuya", u"tuyos", u"tuyas", u"suyo", u"suya", u"suyos", u"suyas", u"nuestro", u"nuestra", u"nuestros", u"nuestras", u"vuestro", u"vuestra", u"vuestros", u"vuestras"  },
+             u"demostrative" : { u"éste", u"ésta", u"esto", u"éstos", u"éstas", u"ése", u"ésa", u"eso", u"ésos", u"ésas", u"aquel", u"aquella", u"aquello", u"aquéllos", u"aquéllas"   },
+             u"relative" : { u"que", u"cual", u"cuales", u"donde", u"quien", u"quienes", u"cuyo", u"cuya", u"cuyos", u"cuyas" },
+             u"numeral" : { u"doble", u"triple", u"cuádruple" }
              }
         self.other = { 
-              "synthagmal": { "al", "del" },
-              "logic" : { "si" },
-              "lownum" : { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"}
+              u"synthagmal": { u"al", u"del" },
+              u"logic" : { u"si" },
+              u"lownum" : { u"1", u"2", u"3", u"4", u"5", u"6", u"7", u"8", u"9", u"10", u"11", u"12", u"13", u"14", u"15"}
               }
         self.commonverbs = {
-            "estar" : { "estar", "estando", "estado", "estoy", "estás", "está", "estamos", "están", "esta", "estáis", 
-                        "estuve", "estuviste", "estuvo", "estuvimos", "estuvieron", "estuvísteis", 
-                        "estaré", "estarás", "estará", "estaremos", "estarán", "estaréis",
-                        "estaba", "estabas", "estaba", "estábamos", "estaban", "estábais",
-                        "estaría", "estarías", "estaría", "estaríamos", "estarían", "estaríais",
-                        "esté", "estés","esté", "estemos", "estén", "estéis",
-                        "estuviera", "estuvieras", "estuviera", "estuviéramos", "estuvieran", "estuviérais", 
-                        "estuviese", "estuvieses", "estuviese", "estuviésemos", "estuviesen", "estuviéseis",
-                        "estuviere", "estuvieres", "estuvieres", "estuviéremos", "estuvieren", "estuviéreis"
+            u"estar" : { u"estar", u"estando", u"estado", u"estoy", u"estás", u"está", u"estamos", u"están", u"esta", u"estáis", 
+                        u"estuve", u"estuviste", u"estuvo", u"estuvimos", u"estuvieron", u"estuvísteis", 
+                        u"estaré", u"estarás", u"estará", u"estaremos", u"estarán", u"estaréis",
+                        u"estaba", u"estabas", u"estaba", u"estábamos", u"estaban", u"estábais",
+                        u"estaría", u"estarías", u"estaría", u"estaríamos", u"estarían", u"estaríais",
+                        u"esté", u"estés","esté", u"estemos", u"estén", u"estéis",
+                        u"estuviera", u"estuvieras", u"estuviera", u"estuviéramos", u"estuvieran", u"estuviérais", 
+                        u"estuviese", u"estuvieses", u"estuviese", u"estuviésemos", u"estuviesen", u"estuviéseis",
+                        u"estuviere", u"estuvieres", u"estuvieres", u"estuviéremos", u"estuvieren", u"estuviéreis"
                         },
-            "ser" : { "ser", "siendo", "sido", "soy", "eres", "es", "somos", "son", "sois"
-                      "fuí", "fuiste", "fué", "fuimos", "fueron", "fuísteis",
-                      "seré", "serás", "será", "seremos", "serán", "seréis",
-                      "era", "eras", "era", "éramos", "eran", "érais",
-                      "sería", "serías", "sería", "seríamos", "serían", "seríais",
-                      "sea", "seas", "sea", "seamos", "sean", "seais",
-                      "fuera","fueras", "fuera", "fuéramos", "fueran", "fuérais",
-                      "fuese", "fueses","fuese", "fuésemos", "fuesen", "fuéseis",
-                      "fuere", "fueres", "fuere", "fuéremos", "fuésen", "fuéreis"                     
+            u"ser" : { u"ser", u"siendo", u"sido", u"soy", u"eres", u"es", u"somos", u"son", u"sois"
+                      u"fuí", u"fuiste", u"fué", u"fuimos", u"fueron", u"fuísteis",
+                      u"seré", u"serás", u"será", u"seremos", u"serán", u"seréis",
+                      u"era", u"eras", u"era", u"éramos", u"eran", u"érais",
+                      u"sería", u"serías", u"sería", u"seríamos", u"serían", u"seríais",
+                      u"sea", u"seas", u"sea", u"seamos", u"sean", u"seais",
+                      u"fuera","fueras", u"fuera", u"fuéramos", u"fueran", u"fuérais",
+                      u"fuese", u"fueses","fuese", u"fuésemos", u"fuesen", u"fuéseis",
+                      u"fuere", u"fueres", u"fuere", u"fuéremos", u"fuésen", u"fuéreis"                     
                      }
                                             
             }
@@ -111,7 +111,7 @@ class Language(object):
 
     def languageEntropy(self, word):
         tautosilabs = {"pr", "br", "fr", "tr", "dr", "kr", "gr", "pl", "bl", "fl", "ti", "kl", "gl" }
-        ends = "jxhu"
+        ends = "jxhut"
         starts = "xw"
         ccallowed = { "ll","rr", "cc", "ee","oo" }
         score = 0

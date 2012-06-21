@@ -8,6 +8,7 @@ import os
 path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
 
 SAVING_ROUTE = path_to('../../var')
+#SAVING_ROUTE ="C:/var"
 SAVING_NAME = 'jornada_impresa_'
 SAVING_ERROR_NAME = 'error_impresa_'
 SAVING_HEURISTICS_NAME = 'heuristics_impresa_'
