@@ -12,6 +12,8 @@ from multiprocessing import Pool
 import constants as const
 
 
+
+
 class Api(object):
 
     def __init__(self, family="", section="", mtype="", txt="", noteid="", year="", month="", day="", detail="", richness="html"):
@@ -153,7 +155,7 @@ class Api(object):
             mjson[0]["content"] = newcontent
             self.result =  json.dumps(mjson)
         except Exception as e:
-            self.requesterror(e.__str__()) 
+            self.requesterror(e.__str__())
     
     def dispatchRichness(self, jItem):
         if isinstance(jItem, dict):
