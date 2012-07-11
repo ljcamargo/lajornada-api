@@ -43,6 +43,7 @@ class Impresa(parsing):
         
         jItems = []
         self.Entropy = defaultdict(int)
+        self.Keywords = defaultdict(int)
         self.jAnalytics = []
         self.jHeuristics = []
         self.jMaster = defaultdict(int)
@@ -85,15 +86,17 @@ class Impresa(parsing):
         
         lang = ESP()
         for k,v in self.jMaster.iteritems():
-            if lang.languageEntropy(k)>2:
+            if lang.wordOddnessScore(k)>2:
                 self.Entropy[k]=v
         
         try:            
             self.jAnalytics = { 
-                    "title": date,
-                    "general" : self.jMaster,
-                    "entropy" : self.Entropy,
-                    "environment" : self.jHeuristics
+                    "title": "impresa",
+                    "date": date,
+                    "mode" : self.jMaster,
+                    "oddity" : self.Entropy,
+                    "keywords": self.Keywords,
+                    "content" : self.jHeuristics
                     }
             self.dumpJsonHeuristics(self.jAnalytics)
         except Exception as error2:
@@ -697,6 +700,7 @@ class Impresa(parsing):
     def getNoteContent(self, noteid):
         heur = Heuristics('esp')
         jHNoteContent = []
+        jHNoteOddness = defaultdict(int)
         jHNoteKeywords = defaultdict(int)
         filestr = self.getHttpNoteResourceString('articulo', noteid)
         xmldoc = minidom.parseString(filestr)
@@ -707,7 +711,7 @@ class Impresa(parsing):
             "plain" : self.getRecursiveText(titlelst),
             "list" : self.getListItems(titlelst)
                  }
-        self.appendNodeToHeuristics(heur,titlelst, jHNoteContent, jHNoteKeywords)
+        self.appendNodeToHeuristics(heur,titlelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)
         
         hedlinelst = xmldoc.getElementsByTagName('hedline')[0].childNodes
         hedline = {
@@ -715,7 +719,7 @@ class Impresa(parsing):
             "plain" : self.getRecursiveText(hedlinelst),
             "list" : self.getListItems(hedlinelst)         
                 }
-        self.appendNodeToHeuristics(heur,hedlinelst, jHNoteContent, jHNoteKeywords)        
+        self.appendNodeToHeuristics(heur,hedlinelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)        
         
         byline = self.getRecursiveText(xmldoc.getElementsByTagName('byline')[0].childNodes[0])
         
@@ -725,7 +729,7 @@ class Impresa(parsing):
             "plain" : self.getRecursiveText(abstractlst),
             "list" : self.getListItems(abstractlst)
             }
-        self.appendNodeToHeuristics(heur,abstractlst, jHNoteContent, jHNoteKeywords)
+        self.appendNodeToHeuristics(heur,abstractlst, jHNoteContent, jHNoteOddness, jHNoteKeywords)
         
         bodycontent = xmldoc.getElementsByTagName('body.content')[0].childNodes
         text = {
@@ -733,14 +737,15 @@ class Impresa(parsing):
             "plain" : self.getRecursiveText(bodycontent),
             "list" : self.getListItems(bodycontent)       
             }
-        self.appendNodeToHeuristics(heur,bodycontent, jHNoteContent, jHNoteKeywords)
+        self.appendNodeToHeuristics(heur,bodycontent, jHNoteContent, jHNoteOddness, jHNoteKeywords)
             
         medialst = xmldoc.getElementsByTagName('media')
         imgs = self.getImagesObject(medialst)
             
 
-        jHNote = { noteid : { "words" : jHNoteContent, "freqs" : jHNoteKeywords } }
-        self.jMaster = heur.appendToMaster(4,self.jMaster,jHNoteKeywords)
+        jHNote = { noteid : { "words" : jHNoteContent, "moda" : jHNoteKeywords, "oddness": jHNoteOddness } }
+        self.jMaster = heur.appendToMaster(4,self.jMaster, jHNoteKeywords)
+        self.jMaster = heur.appendToMaster(4,self.jMaster, jHNoteOddness)
         self.jHeuristics.append(jHNote)
 
             

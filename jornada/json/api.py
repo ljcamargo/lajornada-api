@@ -31,15 +31,16 @@ class Api(object):
         self.richness = richness if (richness != None or richness == "") else "html"
         self.json = "" 
         self.result = ""
-         
+        
+        if not self.richness in ['html','plain','list']:
+            self.richness = 'html'
+
+        if not self.richness in ['nocontent','minimal','full']:
+            self.detail = 'full'
+                  
         if self.year=="" or self.month=="" or self.day=="":
             self.getDate()
-            
-        if len(self.month) < 2:
-            self.month = "0"+self.month     
-        if len(self.day) < 2:
-            self.day = "0"+self.day 
-            
+                        
         self.getjson()
         
         if len(self.json)>1:
@@ -57,19 +58,21 @@ class Api(object):
         now = dayt.now()
         self.year = str(now.year)
         self.month = str(now.month)
-        if len(self.month) < 1:
+        if len(self.month) < 2:
             self.month = "0"+self.month     
         self.day = str(now.day)
-        if len(self.day) < 1:
+        if len(self.day) < 2:
             self.day = "0"+self.day 
             
     def getPastDate(self):
+        print ('past date')
         now = dayt.now()-timedelta(days=1)
         self.year = str(now.year)
         self.month = str(now.month)
-        if len(self.month) < 1:
-            self.month = "0"+self.month     
-        if len(self.day) < 1:
+        if len(self.month) < 2:
+            self.month = "0"+self.month
+        self.day = str(now.day)     
+        if len(self.day) < 2:
             self.day = "0"+self.day
             
     def asyncInvokeDailyFileGeneration(self):
@@ -77,6 +80,10 @@ class Api(object):
         pool.apply_async(Impresa(), [], None) 
                 
     def getjson(self):
+        if len(self.month) < 2:
+            self.month = "0"+self.month     
+        if len(self.day) < 2:
+            self.day = "0"+self.day 
         filename = const.SAVING_ROUTE + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
         if os.path.isfile(filename):
             print "getting file: "+filename
@@ -143,7 +150,7 @@ class Api(object):
                         thisNote['content']['text']=self.dispatchRichness(thisNote['content']['text'])
                         
                         #dispatch detail
-                        if self.detail != "":
+                        if self.detail != ("" or "full"):
                             if self.detail == self.DETAIL_NO_CONTENT:
                                 del thisNote['content']
                             if self.detail == self.DETAIL_MINIMAL:
@@ -173,7 +180,7 @@ class Api(object):
 
                       
 if __name__ == '__main__':
-    miapi =Api("","","","","","","","","nocontent","plain")
+    miapi =Api("","","","","","","","","full","richness")
     print miapi.getResult()
     
     

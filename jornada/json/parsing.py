@@ -164,11 +164,12 @@ class parsing(object):
         return rlist
     
     
-    def appendNodeToHeuristics(self, heuristics, node, words, keywords):
+    def appendNodeToHeuristics(self, heuristics, node, words, oddness,keywords):
         for item in node:
             if item.nodeName=='p':
                 inp = self.getRecursiveText(item)
                 if inp != None:
                     if inp != '':
                         heuristics._matchTextToList(inp, words)
-                        heuristics._matchTextToDict(inp, keywords)    
+                        heuristics._proccessOddness(inp, oddness)
+                        heuristics._matchTextToDict(inp, keywords)     

@@ -32,21 +32,6 @@ class Language(object):
                 if text == word:
                     return True
         return False
-
-    def languageEntropy(self, word):    
-        word = u'%s' % word.strip(' ,.;-') 
-        score = 0
-        if len(word) > 4: score += 1
-        if len(word) > 8: score += 1 
-        if word != word.lower(): score += 1
-        if re.search(r'[ñxwk]', word, re.IGNORECASE): score += 1
-        if re.search(r'[jáéú]', word, re.IGNORECASE): score += 1
-        if re.search(r'[!\$\%\&\/\(\)\?¡¿\?\*`]', word, re.IGNORECASE): score += 1
-        if re.search(r'%s' % '|'.join(self.tautosilabs), word, re.IGNORECASE): score += 1
-        if re.search(r'^[%s]' % self.starts, word, re.IGNORECASE): score += 1
-        if re.search(r'[%s]$' % self.ends, word, re.IGNORECASE): score += 1
-        if re.search(r'([^%s])\1' % '|'.join(self.ccallowed), word, re.IGNORECASE): score += 1
-        
-        if DEBUG: print u'entrpy: %s = %i' % (word, score) 
-        
-        return score
+    
+    def wordOddnessScore(self, word):
+        pass

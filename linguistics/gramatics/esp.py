@@ -5,9 +5,12 @@ Created on 18/06/2012
 '''
 
 from language import Language
+import re 
+
+DEBUG = True
 
 class ESP(Language):     
-    tautosilabs = (u'pr', u'br', u'fr', u'tr', u'dr', u'kr', u'gr', u'pl', u'bl', u'fl', u'ti', u'kl', u'gl')
+    tautosyllabs = (u'pr', u'br', u'fr', u'tr', u'dr', u'kr', u'gr', u'pl', u'bl', u'fl', u'ti', u'kl', u'gl')
     ends = u'jxhut'
     starts = u'xw'
     ccallowed = (u'll', u'rr', u'cc', u'ee', u'oo')
@@ -84,5 +87,23 @@ class ESP(Language):
                        u'fuere', u'fueres', u'fuere', u'fuéremos', u'fuésen', u'fuéreis')
          }                             
     }
+    
+    def wordOddnessScore(self, word):    
+        word = u'%s' % word.strip(' ,.;-') 
+        score = 0
+        if len(word) > 4: score += 1
+        if len(word) > 8: score += 1 
+        if word != word.lower(): score += 1
+        if re.search(r'[ñxwk]', word, re.IGNORECASE): score += 1
+        if re.search(r'[jáéú]', word, re.IGNORECASE): score += 1
+        if re.search(r'[!\$\%\&\/\(\)\?¡¿\?\*`]', word, re.IGNORECASE): score += 1
+        if re.search(r'%s' % '|'.join(self.tautosyllabs), word, re.IGNORECASE): score += 1
+        if re.search(r'^[%s]' % self.starts, word, re.IGNORECASE): score += 1
+        if re.search(r'[%s]$' % self.ends, word, re.IGNORECASE): score += 1
+        if re.search(r'([^%s])\1' % '|'.join(self.ccallowed), word, re.IGNORECASE): score += 1
+        
+        if DEBUG: print u'entrpy: %s = %i' % (word, score) 
+        
+        return score
 
         

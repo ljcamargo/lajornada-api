@@ -12,54 +12,7 @@ class Heuristics(object):
     def __init__(self, lang):
         self.lang = lang
         pass
-
-    def matchArrayToList(self, textl, list):
-            for text in textl:
-                self.matchTextToList(text, list)
-            return list
-            
-    def matchTextToList(self, text, list):
-        words = text.split()
-        for word in words:
-            list = self.appendWordToList(word, list)
-        return list
-    
-    def matchArrayToDict(self, textl, dict):
-        for text in textl:
-            self.matchTextToDict(text, dict)
-        return dict
-        
-    def matchTextToDict(self, text, dict):
-        words = text.split()
-        for word in words:
-            dict = self.appendWordToFreqDict(word, dict)
-        return dict
-    
-    def appendWordToList(self, text, list):
-        text = text.replace("(","")
-        text = text.replace(")","")
-        isIn = False
-        for litem in list:
-            if litem == text: 
-                isIn = True
-        if not isIn:
-            lang = LANG()
-            if lang.isNounOrVerb(text):
-                list.append(text)  
-        return list
-    
-    def appendWordToFreqDict(self, text, dict):
-        text = text.replace("(","")
-        text = text.replace(")","")
-        if dict.has_key(text):
-            dict[text] += 1
-        else:
-            lang = LANG()
-            if lang.isNounOrVerb(text):
-                dict[text] = 1
-            
-        return dict
-    
+  
     
     #POINTER
     
@@ -80,6 +33,12 @@ class Heuristics(object):
         words = text.split()
         for word in words:
             self._appendWordToFreqDict(word, dict)
+
+    def _proccessOddness(self, text, dict):
+        words = text.split()
+        for word in words:
+            self._calcWordOddness(word, dict)
+    
     
     def _appendWordToList(self, text, list):
         text = text.replace("(","")
@@ -103,6 +62,12 @@ class Heuristics(object):
             if lang.isNounOrVerb(text):
                 dict[text] = 1
     
+    def _calcWordOddness(self, text, dict):
+        if dict.has_key(text):
+            pass
+        else:
+            lang = LANG()
+            dict[text] = lang.wordOddnessScore(text)
     
     
     
@@ -140,8 +105,7 @@ class Heuristics(object):
                 if partial>0:
                     score +=partial
         return score
-            
-    
+              
     def isAdjacentInList(self, word, guess, wlist):
         score = 0
         for i, val in enumerate(wlist):
