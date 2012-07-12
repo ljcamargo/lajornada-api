@@ -1,5 +1,9 @@
 *.py[co]
 
+# IDE's
+.pydevproject
+.project
+
 # Packages
 *.egg
 *.egg-info
