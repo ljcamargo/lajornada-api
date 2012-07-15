@@ -85,7 +85,7 @@ class Api(object):
             self.month = "0"+self.month     
         if len(self.day) < 2:
             self.day = "0"+self.day 
-        filename = const.SAVING_ROUTE + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
+        filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
         if os.path.isfile(filename):
             print "getting file: "+filename
             f = open(filename, 'r')
@@ -95,11 +95,13 @@ class Api(object):
             print "filenotfound "+filename
             
     def notbeenfound(self):
+        filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json' 
         jOmNews = { 
            "title": u"Noticias Impresas Periódico La Jornada",
            "publication": u"La Jornada",
            "company": u"Demos Desarrollo de Medios S.A. de C.V.",
            "message": "No se ha encontrado la fecha seleccionada",
+           "debug": filename,
            "status" : "noresults"
            }
         
