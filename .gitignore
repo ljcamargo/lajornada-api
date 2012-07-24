@@ -3,6 +3,7 @@
 # IDE's
 .pydevproject
 .project
+.prefs
 
 # Packages
 *.egg
