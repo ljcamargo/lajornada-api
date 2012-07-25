@@ -7,7 +7,6 @@ Created on 13/05/2012
 
 
 import re
-from lxml.html.clean import clean_html
 
 class parsing(object):
     
@@ -141,7 +140,6 @@ class parsing(object):
                     val = val.strip()
                     if val != "" and not val.isspace():   
                         text += val
-        text = clean_html(text)
         return text
             
     def joinLines(self, lst, breaker, minimus):
