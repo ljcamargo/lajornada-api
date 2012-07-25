@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 '''
 Created on 19/06/2012
 
 @author: lcammx
 '''
-
-from collections import defaultdict
+import re
 from linguistics.gramatics.esp import ESP as LANG
 
 class Heuristics(object):
@@ -85,6 +85,12 @@ class Heuristics(object):
                 else:
                     master[k] = v
         return master
+    
+    def stripWordEnclousureMarks(self, word):
+        list = "()[]{}'\""
+        for c in list:
+            word = word.replace(c,"")
+        return word
     
     def findProbableAdjacent(self,master,infra, circa, environ):
         for k,v in master.iteritems():

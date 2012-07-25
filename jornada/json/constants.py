@@ -1,4 +1,5 @@
-﻿'''
+﻿# -*- coding: utf-8 -*-
+'''
 Created on 13/06/2012
 
 @author: lcammx

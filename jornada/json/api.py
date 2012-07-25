@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-﻿'''
-Created on 11/06/2012
 
-@author: lcammx
-'''
 import json
 import os
 from impresa import Impresa
@@ -33,10 +29,10 @@ class Api(object):
         self.json = "" 
         self.result = ""
         
-        if not self.richness in ['html','plain','list']:
+        if not self.richness in ['html','plain','list','all']:
             self.richness = 'html'
 
-        if not self.richness in ['nocontent','minimal','full']:
+        if not self.detail in ['nocontent','minimal','full']:
             self.detail = 'full'
                   
         if self.year=="" or self.month=="" or self.day=="":
@@ -53,7 +49,6 @@ class Api(object):
                 self.runrequest()
             else:
                 self.notbeenfound()
-            #self.asyncInvokeDailyFileGeneration()
         
     def getDate(self):
         now = dayt.now()
@@ -170,7 +165,7 @@ class Api(object):
     def dispatchRichness(self, jItem):
         if isinstance(jItem, dict):
             level = self.richness
-            if level == all:
+            if level == 'all':
                 return jItem
             else:
                 nItem = jItem[level]
@@ -183,7 +178,7 @@ class Api(object):
 
                       
 if __name__ == '__main__':
-    miapi =Api("","","","","","","","","full","richness")
+    miapi =Api("","","","","","","","","full","plain")
     print miapi.getResult()
     
     

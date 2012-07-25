@@ -1,4 +1,5 @@
-﻿'''
+﻿# -*- coding: utf-8 -*-
+'''
 Created on 13/05/2012
 
 @author: lcammx
@@ -12,9 +13,7 @@ from xml.dom import minidom
 from parsing import parsing
 import json
 import httplib
-import operator
 import constants as const
-from collections import OrderedDict
 from operator import itemgetter
 from linguistics.gramatics.esp import ESP
 from linguistics.gramatics.heuristics import Heuristics
@@ -48,19 +47,15 @@ class Impresa(parsing):
         self.jHeuristics = []
         self.jMaster = defaultdict(int)
         
-        #try:
+
         jItems = self.getNoteItemsFromDir(jItems)
         jItems = self.getNoteItemsFromPortada(jItems)
         jItems = self.getNoteItemsFromContra(jItems)
         jItems = self.getNoteItemsFromCartones(jItems)
         jItems = self.getNoteItemsFromAudioN(jItems)
-    #except Exception as e:
-        #status="error"
-        #jItems = []
-        #self.dumpErrorLog(e)
-    #else:    
+   
         date = "" + str(self.year) + "/" + str(self.month) + "/" + str(self.year)
-        #orderedItems = OrderedDict(sorted(jItems,  key=lambda k: k.iteritems()))
+        orderedItems = sorted(jItems, key=itemgetter('index'))
         jOmNews = { 
            "title": const.DELIVERY_DESCRIPTION,
            "publication": const.PUB_NAME,
@@ -80,20 +75,22 @@ class Impresa(parsing):
            "alias": const.DELIVERY_ALIAS, 
            "contentKind": const.DELIVERY_KIND,
            "status" : status,   
-           "content": jItems,
+           "content": orderedItems,
            }
         self.dumpJsonItems([jOmNews])
         
         lang = ESP()
+        heur = Heuristics("es")
         for k,v in self.jMaster.iteritems():
             if lang.wordOddnessScore(k)>2:
-                self.Entropy[k]=v
+                k = heur.stripWordEnclousureMarks(k)
+                self.Entropy[k]= v
         
         try:            
             self.jAnalytics = { 
                     "title": "impresa",
                     "date": date,
-                    "mode" : self.jMaster,
+                    "incidence" : self.jMaster,
                     "oddity" : self.Entropy,
                     "keywords": self.Keywords,
                     "content" : self.jHeuristics
@@ -232,6 +229,10 @@ class Impresa(parsing):
             return "noticia"
         if mtype == "Opinion":
             return "columna"
+        if mtype == "portada":
+            return "noticia"
+        if mtype == "contra":
+            return "noticia"
         return mtype
     
     def getImagesObject(self, medialst):
@@ -266,9 +267,7 @@ class Impresa(parsing):
         
     def getNoteItemsFromDir(self, jItems):
         family = "dir"
-        #filen = self.getResourceRoute('dir')
         filestr = self.getHttpResourceString('dir')
-        #xmldoc = minidom.parse(filen)
         xmldoc = minidom.parseString(filestr)
         directory = xmldoc.getElementsByTagName('Item')
         x = 0
@@ -281,6 +280,9 @@ class Impresa(parsing):
             
             page = self.getRecursiveText(node.getElementsByTagName('page'))
             order = self.getRecursiveText(node.getElementsByTagName('ord'))
+            
+            page = self.getIntFromText(page)
+            order = self.getIntFromText(order)
             
             title = self.getRecursiveText(node.getElementsByTagName('title'))
 
@@ -310,6 +312,7 @@ class Impresa(parsing):
             
             jItem = {
                      "id": nodeid,
+                     "index":(page*order),
                      "page":page,
                      "order":order,
                      "family": family,
@@ -320,7 +323,7 @@ class Impresa(parsing):
                      "edTitle": title,
                      "summary": summary,
                      "edSummary": summary,
-                     "abstract": abstract,
+                     "abstract": "",
                      "series": series,
                      "author": author,
                      "date": date,
@@ -333,17 +336,18 @@ class Impresa(parsing):
         #RAYUELA
         rayuela = xmldoc.getElementsByTagName('Rayuela')[0]
         section = "rayuela"
-        stype = "bullet"
+        type = "bullet"
         title = self.getRecursiveText(rayuela)
 
         abstract = ""    
         new = {
              "id": "",
-             "page": "0",
+             "index":0,
+             "page": 0,
              "order": 0,
              "family": "contra",
              "section": "rayuela",
-             "type": stype,
+             "type": type,
              "noteXmlUrl": "",
              "title": title,
              "edTitle": title,
@@ -366,9 +370,6 @@ class Impresa(parsing):
         
     def getNoteItemsFromPortada(self, jItems):
         family = "portada"
-        #filen = self.getResourceRoute('portada')
-        #filestr = self.getHttpResourceString('portada')
-        #xmldoc = minidom.parse(filen)
         filestr = self.getHttpResourceString('portada')
         xmldoc = minidom.parseString(filestr)
         directory = xmldoc.getElementsByTagName('Item')
@@ -412,6 +413,7 @@ class Impresa(parsing):
                         preimgs = imgs
                     new = {
                          "id": nodeid,
+                         "index":jItems[i].get('index'),
                          "page": jItems[i].get('page'),
                          "order": jItems[i].get('order'),
                          "family": family,
@@ -439,7 +441,7 @@ class Impresa(parsing):
             nodeid = ""
             noteXmlUrl =  ""
             section = ""
-            stype = "orphan_photo"
+            stype = "foto"
             title = node.getAttribute('cabeza')
             summary = []
             series = ""
@@ -464,7 +466,8 @@ class Impresa(parsing):
             abstract = ""    
             new = {
                  "id": nodeid,
-                 "page": "0",
+                 "index":y,
+                 "page": 0,
                  "order": y,
                  "family": family,
                  "section": section,
@@ -532,6 +535,7 @@ class Impresa(parsing):
                         preimgs = imgs
                     new = {
                          "id": nodeid,
+                         "index":jItems[i].get('index'),
                          "page": jItems[i].get('page'),
                          "order": jItems[i].get('order'),
                          "family": family,
@@ -560,7 +564,7 @@ class Impresa(parsing):
             nodeid = ""
             noteXmlUrl =  ""
             section = ""
-            stype = "orphan_photo"
+            stype = "foto"
             title = node.getAttribute('cabeza')
             summary = []
             series = ""
@@ -585,7 +589,8 @@ class Impresa(parsing):
             abstract = ""    
             new = {
                  "id": nodeid,
-                 "page": "0",
+                 "index":y,
+                 "page": 0,
                  "order": y,
                  "family": family,
                  "section": section,
@@ -618,7 +623,7 @@ class Impresa(parsing):
         for node in directory:
             noteXmlUrl =  ''
             section = node.getAttribute('cartones')
-            type = node.getAttribute('cartones')
+            type = "foto"
 
             curl=""
             urllst = node.getElementsByTagName('url')[0].childNodes[0]
@@ -656,7 +661,8 @@ class Impresa(parsing):
             
             jItem = {
                          "id": curl,
-                         "page": "0",
+                         "index":x,
+                         "page": 0,
                          "order": x,
                          "family": family,
                          "section": section,
@@ -743,7 +749,7 @@ class Impresa(parsing):
         imgs = self.getImagesObject(medialst)
             
 
-        jHNote = { noteid : { "words" : jHNoteContent, "moda" : jHNoteKeywords, "oddness": jHNoteOddness } }
+        jHNote = { noteid : { "words" : jHNoteContent, "incidence" : jHNoteKeywords, "oddity": jHNoteOddness } }
         self.jMaster = heur.appendToMaster(4,self.jMaster, jHNoteKeywords)
         self.jMaster = heur.appendToMaster(4,self.jMaster, jHNoteOddness)
         self.jHeuristics.append(jHNote)

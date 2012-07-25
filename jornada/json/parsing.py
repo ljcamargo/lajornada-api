@@ -1,8 +1,13 @@
+# -*- coding: utf-8 -*-
 '''
 Created on 13/05/2012
 
 @author: lcammx
 '''
+
+
+import re
+from lxml.html.clean import clean_html
 
 class parsing(object):
     
@@ -60,7 +65,12 @@ class parsing(object):
                         val = val.strip()
                         if val != "" and not val.isspace():                              
                             rc.append(val+ "  ")
-            return self.joinLines(rc, " \r", 1)
+            return self.joinLines(rc, "\r \r", 1)
+    
+    def getIntFromText(self, text):
+        text = text.strip()
+        text = re.sub("[^0-9]", "", text)
+        return int(text)
         
     def getLastText(self, node):
             rc = ""
@@ -131,6 +141,7 @@ class parsing(object):
                     val = val.strip()
                     if val != "" and not val.isspace():   
                         text += val
+        text = clean_html(text)
         return text
             
     def joinLines(self, lst, breaker, minimus):
