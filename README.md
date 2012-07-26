@@ -8,3 +8,12 @@ ejecutar comando:
 - jornada/json/python genToday.py
 
 (programación de ejecución: diaria: 4:30 AM GMT-6(-7 [horario de verano]))
+
+
+
+Para el funcionamiento de Últimas Noticias:
+
+ejecutar comando cada hora:
+
+- jornada/json/python genCurrent.py
+
