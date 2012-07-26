@@ -7,7 +7,7 @@ from datetime import datetime as dayt
 from datetime import timedelta
 from multiprocessing import Pool
 import constants as const
-
+from updater import Updater
 
 
 
@@ -36,22 +36,28 @@ class Api(object):
         if not self.detail in ['nocontent','minimal','full']:
             self.detail = 'full'
             
-        if not self.source in ['impresa','ultimas']:
+        if not self.source in ['impresa','ultimas','updates']:
             self.detail = 'impresa'
                   
         if self.year=="" or self.month=="" or self.day=="":
             self.getDate()
+            
+        if self.source == "updates":
+            self.runupdates()
+            return
                         
         self.getjson()
         
         if len(self.json)>1:
             self.runrequest()
+            return
         elif self.source == "ultimas":
             self.getpastjson()
             if len(self.json)>1:
                 self.runrequest()
             else:
                 self.notbeenfound()
+            return
         else: 
             self.getPastDate()
             self.getjson()
@@ -158,7 +164,12 @@ class Api(object):
                "status" : "error"
                }
         
-        self.result =  json.dumps(jOmNews)  
+        self.result =  json.dumps(jOmNews) 
+    
+    def runupdates(self):
+        updater = Updater()
+        updater.runrequest() 
+        self.result = updater.getResult()
         
     def runrequest(self):
         try:

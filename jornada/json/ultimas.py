@@ -148,6 +148,7 @@ class Ultimas(FeedParser):
                      "index":x,
                      "page":0,
                      "order":0,
+                     "priority": "",
                      "family": family,
                      "section": section,
                      "type": type,
@@ -184,8 +185,9 @@ class Ultimas(FeedParser):
             noteXmlUrl =  self.getNoteUrl(nodeid)
             navUrl = self.getUNavUrl(nodeid)
             section = node.getAttribute('section')
-            type = node.getAttribute('type')
-            type = self.getCorrectedType(type)
+            type="noticia"
+            priority = node.getAttribute('type')
+            priority = self.getCorrectedType(type)
             
             title = self.getRecursiveText(node.getElementsByTagName('title'))
             firstplst = node.getElementsByTagName('firstp')
@@ -219,7 +221,7 @@ class Ultimas(FeedParser):
                          "index":jItems[i].get('index'),
                          "page": jItems[i].get('page'),
                          "order": jItems[i].get('order'),
-                         "priority": type,
+                         "priority": priority,
                          "family": family,
                          "section": section,
                          "type": type,
