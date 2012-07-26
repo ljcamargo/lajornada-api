@@ -13,7 +13,7 @@ import constants as const
 
 class Api(object):
 
-    def __init__(self, family="", section="", mtype="", txt="", noteid="", year="", month="", day="", detail="", richness="html"):
+    def __init__(self, family="", section="", mtype="", txt="", noteid="", year="", month="", day="", detail="", richness="html", source="impresa"):
         self.DETAIL_NO_CONTENT = "nocontent"
         self.DETAIL_MINIMAL = "minimal"
         self.family = family if family != None else ""
@@ -26,6 +26,7 @@ class Api(object):
         self.day = day if day != None else ""
         self.detail = detail if detail != None else ""
         self.richness = richness if (richness != None or richness == "") else "html"
+        self.source = source if source != None else "impresa"
         self.json = "" 
         self.result = ""
         
@@ -34,6 +35,9 @@ class Api(object):
 
         if not self.detail in ['nocontent','minimal','full']:
             self.detail = 'full'
+            
+        if not self.source in ['impresa','ultimas']:
+            self.detail = 'impresa'
                   
         if self.year=="" or self.month=="" or self.day=="":
             self.getDate()
@@ -42,6 +46,12 @@ class Api(object):
         
         if len(self.json)>1:
             self.runrequest()
+        elif self.source == "ultimas":
+            self.getpastjson()
+            if len(self.json)>1:
+                self.runrequest()
+            else:
+                self.notbeenfound()
         else: 
             self.getPastDate()
             self.getjson()
@@ -76,11 +86,26 @@ class Api(object):
         pool.apply_async(Impresa(), [], None) 
                 
     def getjson(self):
-        if len(self.month) < 2:
-            self.month = "0"+self.month     
-        if len(self.day) < 2:
-            self.day = "0"+self.day 
-        filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json'
+        if self.source == "impresa":
+            if len(self.month) < 2:
+                self.month = "0"+self.month     
+            if len(self.day) < 2:
+                self.day = "0"+self.day 
+            filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_PRINTED + self.year + '_' + self.month + '_' + self.day + '.json'
+        else:
+            filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'last.json'
+            
+        if os.path.isfile(filename):
+            print "getting file: "+filename
+            f = open(filename, 'r')
+            self.json = f.read()
+            f.close()
+        else:
+            print "filenotfound "+filename
+            
+    def getpastjson(self):
+        filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'prev.json'
+            
         if os.path.isfile(filename):
             print "getting file: "+filename
             f = open(filename, 'r')
@@ -90,26 +115,48 @@ class Api(object):
             print "filenotfound "+filename
             
     def notbeenfound(self):
-        filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME + self.year + '_' + self.month + '_' + self.day + '.json' 
-        jOmNews = { 
-           "title": u"Noticias Impresas Periódico La Jornada",
-           "publication": u"La Jornada",
-           "company": u"Demos Desarrollo de Medios S.A. de C.V.",
-           "message": "No se ha encontrado la fecha seleccionada",
-           "debug": filename,
-           "status" : "noresults"
-           }
+        if self.source == "impresa":
+            filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_PRINTED + self.year + '_' + self.month + '_' + self.day + '.json' 
+            jOmNews = { 
+               "title": const.DELIVERY_DESCRIPTION_PRINTED,
+               "publication": const.PUB_NAME,
+               "company": const.COMPANY_NAME,
+               "message": "No se ha encontrado la fecha seleccionada",
+               "debug": filename,
+               "status" : "noresults"
+               }
+        else:
+            filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'last.json'
+            jOmNews = { 
+               "title": const.DELIVERY_DESCRIPTION_CURRENT,
+               "publication": const.PUB_NAME,
+               "company": const.COMPANY_NAME,
+               "message": "No se ha encontrado el recurso seleccionada",
+               "debug": filename,
+               "status" : "noresults"
+               }
         
         self.result = json.dumps(jOmNews)
         
-    def requesterror(self, error):
-        jOmNews = { 
-           "title": u"Noticias Impresas Periódico La Jornada",
-           "publication": u"La Jornada",
-           "company": u"Demos Desarrollo de Medios S.A. de C.V.",
-           "message": "Ha ocurrido un error en la petición: " + error,
-           "status" : "error"
-           }
+    def requesterror(self, error):        
+        if self.source == "impresa":
+            jOmNews = { 
+               "title": const.DELIVERY_DESCRIPTION_PRINTED,
+               "publication": const.PUB_NAME,
+               "company": const.COMPANY_NAME,
+               "message": "Ha ocurrido un error en la petición: ",
+               "debug": error,
+               "status" : "error"
+               }
+        else:
+            jOmNews = { 
+               "title": const.DELIVERY_DESCRIPTION_CURRENT,
+               "publication": const.PUB_NAME,
+               "company": const.COMPANY_NAME,
+               "message": "Ha ocurrido un error en la petición: ",
+               "debug": error,
+               "status" : "error"
+               }
         
         self.result =  json.dumps(jOmNews)  
         

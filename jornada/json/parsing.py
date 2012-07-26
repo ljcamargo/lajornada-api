@@ -7,6 +7,7 @@ Created on 13/05/2012
 
 
 import re
+from htmlgen import HTMLgen
 
 class parsing(object):
     
@@ -65,6 +66,32 @@ class parsing(object):
                         if val != "" and not val.isspace():                              
                             rc.append(val+ "  ")
             return self.joinLines(rc, "\r \r", 1)
+        
+    def getSingleLineText(self, nodelist):
+            r = ""
+            if hasattr(nodelist, 'hasChildNodes'):
+                if nodelist.hasChildNodes():
+                    for node in nodelist.childNodes: 
+                        val = self.getSingleLineText(node)
+                        if val != None:
+                            val = val.strip()
+                            if val != "" and not val.isspace():                              
+                                r += " " + val
+                else:
+                    if nodelist.nodeType == nodelist.TEXT_NODE:
+                        val = self.getLastText(nodelist)                   
+                        if val != None:
+                            val = val.strip()
+                            if val != "" and not val.isspace():                              
+                                r += " " + val      
+            else:
+                for nodeitem in nodelist:
+                    val = self.getRecursiveText(nodeitem)
+                    if val != None:
+                        val = val.strip()
+                        if val != "" and not val.isspace():                              
+                            r += " " + val
+            return r
     
     def getIntFromText(self, text):
         text = text.strip()
@@ -116,11 +143,13 @@ class parsing(object):
             return rc
 
     def getHtmlFromParragraphs(self, content):
+        html = HTMLgen('utf-8')
         text = ""
         if isinstance(content, list):
             for item in content:
                 if hasattr(item, 'nodeName'):
                     val =  item.toxml()
+                    val = html.sanHTML(val)
                     if val != None:
                         val = val.strip()
                         if val != "" and not val.isspace():   
@@ -130,12 +159,14 @@ class parsing(object):
                 if content.hasChildNodes():
                     for child in content.childNodes:
                         val =  item.toxml()
+                        val = html.sanHTML(val)
                         if val != None:
                             val = val.strip()
                             if val != "" and not val.isspace():   
                                 text += val
             else:
                 val =  item.toxml()
+                val = html.sanHTML(val)
                 if val != None:
                     val = val.strip()
                     if val != "" and not val.isspace():   
