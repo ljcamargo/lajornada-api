@@ -3,19 +3,24 @@
 import json
 import os
 from impresa import Impresa
+from operator import itemgetter
 from datetime import datetime as dayt
 from datetime import timedelta
 from multiprocessing import Pool
 import constants as const
 from updater import Updater
+from jornada.push.notifications import NotificationsManager
 
 
 
 class Api(object):
 
-    def __init__(self, family="", section="", mtype="", txt="", noteid="", year="", month="", day="", detail="", richness="html", source="impresa"):
+    def __init__(self, family="", section="", mtype="", txt="", noteid="", year="", month="", day="", detail="", richness="html", source="impresa",
+                 action="", user=""):
         self.DETAIL_NO_CONTENT = "nocontent"
         self.DETAIL_MINIMAL = "minimal"
+        self.action = action if action != None else ""
+        self.user = user if user != None else ""
         self.family = family if family != None else ""
         self.section = section if section != None else ""
         self.type = mtype if mtype != None else ""
@@ -30,11 +35,25 @@ class Api(object):
         self.json = "" 
         self.result = ""
         
+        if self.action == "regpush":
+            if not self.user == "":
+                pushn = NotificationsManager()
+                pushn.registerId(self.user, 'default')
+                self.actionresponse(self.action, self.user, "done")
+            return
+                
+        if self.action == "unregpush":
+            if not self.user == "":
+                pushn = NotificationsManager()
+                pushn.unregId(self.user, 'default')
+                self.actionresponse(self.action, self.user, "done")
+            return
+        
         if not self.richness in ['html','plain','list','all']:
             self.richness = 'html'
 
         if not self.detail in ['nocontent','minimal','full']:
-            self.detail = 'full'
+            self.detail = 'nocontent'
             
         if not self.source in ['impresa','ultimas','updates']:
             self.detail = 'impresa'
@@ -45,26 +64,23 @@ class Api(object):
         if self.source == "updates":
             self.runupdates()
             return
-                        
-        self.getjson()
-        
-        if len(self.json)>1:
-            self.runrequest()
-            return
-        elif self.source == "ultimas":
-            self.getpastjson()
+                            
+        if self.source == "impresa":
+            self.getjsonPrinted()
             if len(self.json)>1:
                 self.runrequest()
             else:
-                self.notbeenfound()
-            return
-        else: 
-            self.getPastDate()
-            self.getjson()
+                self.minus1day()
+                self.getjsonPrinted()
+                if len(self.json)>1:
+                    self.runrequest()
+                else:
+                    self.notbeenfound()       
+        elif self.source == 'ultimas':
+            self.getjsonCurrent()
             if len(self.json)>1:
                 self.runrequest()
-            else:
-                self.notbeenfound()
+            
         
     def getDate(self):
         now = dayt.now()
@@ -76,7 +92,7 @@ class Api(object):
         if len(self.day) < 2:
             self.day = "0"+self.day 
             
-    def getPastDate(self):
+    def minus1day(self):
         print ('past date')
         now = dayt.now()-timedelta(days=1)
         self.year = str(now.year)
@@ -91,16 +107,14 @@ class Api(object):
         pool = Pool(processes=1)
         pool.apply_async(Impresa(), [], None) 
                 
-    def getjson(self):
+    def getjsonPrinted(self):
         if self.source == "impresa":
             if len(self.month) < 2:
                 self.month = "0"+self.month     
             if len(self.day) < 2:
                 self.day = "0"+self.day 
             filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_PRINTED + self.year + '_' + self.month + '_' + self.day + '.json'
-        else:
-            filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'last.json'
-            
+        
         if os.path.isfile(filename):
             print "getting file: "+filename
             f = open(filename, 'r')
@@ -109,16 +123,22 @@ class Api(object):
         else:
             print "filenotfound "+filename
             
-    def getpastjson(self):
-        filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'prev.json'
-            
+    def getjsonCurrent(self):
+        filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'last.json'
         if os.path.isfile(filename):
             print "getting file: "+filename
             f = open(filename, 'r')
             self.json = f.read()
             f.close()
         else:
-            print "filenotfound "+filename
+            filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'prev.json'
+            if os.path.isfile(filename):
+                print "getting file: "+filename
+                f = open(filename, 'r')
+                self.json = f.read()
+                f.close()
+            else:
+                print "filenotfound "+filename
             
     def notbeenfound(self):
         if self.source == "impresa":
@@ -166,6 +186,16 @@ class Api(object):
         
         self.result =  json.dumps(jOmNews) 
     
+    def actionresponse(self, action, param, status):        
+        jOmNews = { 
+           "title": const.DELIVERY_DESCRIPTION_UPDATES,
+           "publication": const.PUB_NAME,
+           "company": const.COMPANY_NAME,
+           "message": "action=" + action + "; param=" + param,
+           "status" : status
+           }
+        self.result =  json.dumps(jOmNews)
+    
     def runupdates(self):
         updater = Updater()
         updater.runrequest() 
@@ -206,16 +236,17 @@ class Api(object):
                         thisNote['content']['text']=self.dispatchRichness(thisNote['content']['text'])
                         
                         #dispatch detail
-                        if self.detail != ("" or "full"):
-                            if self.detail == self.DETAIL_NO_CONTENT:
-                                del thisNote['content']
-                            if self.detail == self.DETAIL_MINIMAL:
-                                del thisNote['content']
-                                del thisNote['summary']
-                                del thisNote['edSummary']
-                                del thisNote['abstract']
+                        if self.detail == self.DETAIL_NO_CONTENT:
+                            del thisNote['content']
+                        if self.detail == self.DETAIL_MINIMAL:
+                            del thisNote['content']
+                            del thisNote['summary']
+                            del thisNote['edSummary']
+                            del thisNote['abstract']
+                            
                     newcontent.append(thisNote)
-            mjson[0]["content"] = newcontent
+            orderedItems = sorted(newcontent, key=itemgetter('index'))
+            mjson[0]["content"] = orderedItems
             self.result =  json.dumps(mjson)
         except Exception as e:
             self.requesterror(e.__str__())
@@ -236,7 +267,7 @@ class Api(object):
 
                       
 if __name__ == '__main__':
-    miapi =Api("","","","","","","","","full","plain")
+    miapi =Api(source="ultimas")
     print miapi.getResult()
     
     

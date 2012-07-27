@@ -8,9 +8,12 @@ Created on 13/06/2012
 import os
 path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
 
+
+KEY_ANDROID_API_PUSH = "AIzaSyC-oyY_WsMsNk_T3c-rX-Ya-fgxEbd8c9Q"
 SAVING_ROUTE = path_to('../../var')
 SAVING_NAME_PRINTED = 'jornada_impresa_'
 SAVING_NAME_CURRENT = 'jornada_ultimas_'
+SAVING_PUSH_LIST = 'jornada_push_'
 SAVING_ERROR_NAME_PRINTED = 'error_impresa_'
 SAVING_ERROR_NAME_CURRENT = 'error_impresa_'
 SAVING_HEURISTICS_NAME_PRINTED = 'heuristics_impresa_'

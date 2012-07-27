@@ -3,15 +3,18 @@
 import json
 import os
 import constants as const
+from jornada.push.notifications import NotificationsManager
 from datetime import datetime
 
 
 
 class Updater(object):
 
-    def __init__(self):        
+    def __init__(self): 
+        print "finding news updates..."
+        self.updates = []      
         self.current = ""
-        self.previous = ""
+        self.prev = ""
                      
         self.getjson()
         
@@ -95,9 +98,9 @@ class Updater(object):
                 del thisNote['page']
                 del thisNote['series'] 
                 
-                #PUSH NOTE  
-                self.pushNote(thisNote)
-                #/PUSH NOTE
+                #ADD NOTE  
+                self.updates.append(thisNote['title'] )
+                #/ADD NOTE
                     
                 newcontent.append(thisNote)
             jOmNews = { 
@@ -122,36 +125,14 @@ class Updater(object):
                "content": newcontent,
                }
         self.result =  json.dumps(jOmNews)
+        self.pushUpdates()
     
-    def pushNote(self, note):
-        title = note['title']
-        url = note['navUrl']
-        self.pushToApple(title, url)
-        self.pushToAndroid(title, url)
-    
-    def pushToApple(self, title, navurl):
-        Apple = {
-            "aps": {
-                "alert": title,
-                "badge": 1,
-                "sound": "default"       
-                },
-             "rel": {
-                "url":navurl,
-                "name": "La Jornada"
-                }
-        }
-        print json.dumps(Apple)
-        
-    def pushToAndroid(self, title, navurl):
-        Android = {
-            "registration_ids": "0",
-            "data": {
-                "message": title,
-                "url": navurl
-             }
-        }
-        print json.dumps(Android)
+    def pushUpdates(self):
+        print "sending update string"
+        pushtxt = ';'.join(self.updates)
+        push = NotificationsManager()
+        print pushtxt
+        push.sendPushToUserList("default", pushtxt, "La Jornada")
         
             
     def getResult(self):
@@ -161,10 +142,6 @@ class Updater(object):
 if __name__ == '__main__':
     miapi =Updater()
     print miapi.getResult()
-    
-    
-            
-            
 
  
 

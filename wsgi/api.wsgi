@@ -25,7 +25,9 @@ def application(environ, start_response):
     detail = escape(parameters['detail'][0]) if 'detail' in parameters else ""
     richness = escape(parameters['richness'][0]) if 'richness' in parameters else ""
     source = escape(parameters['source'][0]) if 'source' in parameters else ""
-    thisapi = Api(family,section,mtype,txt,noteid,year,month,day,detail, richness, source)
+    action = escape(parameters['action'][0]) if 'action' in parameters else ""
+    user = escape(parameters['user'][0]) if 'user' in parameters else ""
+    thisapi = Api(family,section,mtype,txt,noteid,year,month,day,detail, richness, source, action, user)
     output = thisapi.getResult()
     response_headers = [('Content-type', 'application/json'),
                         ('Content-Length', str(len(output)))]
