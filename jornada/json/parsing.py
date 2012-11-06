@@ -42,6 +42,36 @@ class parsing(object):
             return str.strip() 
         
     def getRecursiveText(self, nodelist):
+        rc = ""
+        if hasattr(nodelist, 'hasChildNodes'):
+            if nodelist.hasChildNodes():
+                for node in nodelist.childNodes: 
+                    if node.nodeName == "p" and not node.hasAttributes():
+                        rc+= "\r"
+                    val = self.getRecursiveText(node)
+                    if node.nodeName == "p" and not node.hasAttributes():
+                        rc+= "\r"
+                    if val != None:
+                        val = val.strip()
+                        if val != "" and not val.isspace():                              
+                            rc+=val + " "
+            else:
+                if nodelist.nodeType == nodelist.TEXT_NODE:
+                    val = self.getLastText(nodelist)                   
+                    if val != None:
+                        val = val.strip()
+                        if val != "" and not val.isspace():                              
+                            rc+= val + " "    
+        else:
+            for nodeitem in nodelist:
+                val = self.getRecursiveText(nodeitem)
+                if val != None:
+                    val = val.strip()
+                    if val != "" and not val.isspace():                              
+                        rc += val + " "
+        return rc
+        
+    def getRecursiveText2(self, nodelist):
             rc = []
             if hasattr(nodelist, 'hasChildNodes'):
                 if nodelist.hasChildNodes():
@@ -204,12 +234,17 @@ class parsing(object):
         return rlist
     
     
-    def appendNodeToHeuristics(self, heuristics, node, words, oddness,keywords):
-        for item in node:
-            if item.nodeName=='p':
-                inp = self.getRecursiveText(item)
-                if inp != None:
-                    if inp != '':
-                        heuristics._matchTextToList(inp, words)
-                        heuristics._proccessOddness(inp, oddness)
-                        heuristics._matchTextToDict(inp, keywords)     
+                        
+    def appendNodeToHeuristics(self, heuristics, node, words, oddness,keywords, abstracted):
+        try: 
+            for item in node:
+                if item.nodeName=='p':
+                    inp = self.getRecursiveText(item)
+                    if inp != None:
+                        if inp != '':
+                            heuristics._matchTextToList(inp, words)
+                            heuristics._proccessOddness(inp, oddness)
+                            heuristics._matchTextToDict(inp, keywords)
+                            heuristics._processAbstraction(inp, abstracted)
+        except:
+            pass

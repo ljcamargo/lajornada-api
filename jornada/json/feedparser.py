@@ -209,6 +209,7 @@ class FeedParser(parsing):
         jHNoteContent = []
         jHNoteOddness = defaultdict(int)
         jHNoteKeywords = defaultdict(int)
+        jHNoteAbstracted = []
         filestr = self.getHttpNoteResourceString('articulo', noteid)
         xmldoc = minidom.parseString(filestr)
         
@@ -218,7 +219,7 @@ class FeedParser(parsing):
             "plain" : self.getRecursiveText(titlelst),
             "list" : self.getListItems(titlelst)
                  }
-        self.appendNodeToHeuristics(heur,titlelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)
+        self.appendNodeToHeuristics(heur,titlelst, jHNoteContent, jHNoteOddness, jHNoteKeywords, jHNoteAbstracted)
         
         hedlinelst = xmldoc.getElementsByTagName('hedline')[0].childNodes
         hedline = {
@@ -226,7 +227,7 @@ class FeedParser(parsing):
             "plain" : self.getRecursiveText(hedlinelst),
             "list" : self.getListItems(hedlinelst)         
                 }
-        self.appendNodeToHeuristics(heur,hedlinelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)        
+        self.appendNodeToHeuristics(heur,hedlinelst, jHNoteContent, jHNoteOddness, jHNoteKeywords, jHNoteAbstracted)        
         
         byline = self.getRecursiveText(xmldoc.getElementsByTagName('byline')[0].childNodes[0])
         
@@ -236,7 +237,7 @@ class FeedParser(parsing):
             "plain" : self.getRecursiveText(abstractlst),
             "list" : self.getListItems(abstractlst)
             }
-        self.appendNodeToHeuristics(heur,abstractlst, jHNoteContent, jHNoteOddness, jHNoteKeywords)
+        self.appendNodeToHeuristics(heur,abstractlst, jHNoteContent, jHNoteOddness, jHNoteKeywords, jHNoteAbstracted)
         
         bodycontent = xmldoc.getElementsByTagName('body.content')[0].childNodes
         text = {
@@ -244,16 +245,24 @@ class FeedParser(parsing):
             "plain" : self.getRecursiveText(bodycontent),
             "list" : self.getListItems(bodycontent)       
             }
-        self.appendNodeToHeuristics(heur,bodycontent, jHNoteContent, jHNoteOddness, jHNoteKeywords)
+        self.appendNodeToHeuristics(heur,bodycontent, jHNoteContent, jHNoteOddness, jHNoteKeywords, jHNoteAbstracted)
             
         medialst = xmldoc.getElementsByTagName('media')
         imgs = self.getImagesObject(medialst)
+        
+        for img in imgs:     
+            if not img['alt'] is None: self.appendNodeToHeuristics(heur,img['alt'], jHNoteContent, jHNoteOddness, jHNoteKeywords, jHNoteAbstracted)
+            if not img['header'] is None: self.appendNodeToHeuristics(heur,img['header'], jHNoteContent, jHNoteOddness, jHNoteKeywords, jHNoteAbstracted)
+            if not img['caption'] is None: self.appendNodeToHeuristics(heur,img['caption'], jHNoteContent, jHNoteOddness, jHNoteKeywords, jHNoteAbstracted)
+            if not img['author'] is None: self.appendNodeToHeuristics(heur,img['author'], jHNoteContent, jHNoteOddness, jHNoteKeywords, jHNoteAbstracted)
+        
             
-
-        jHNote = { noteid : { "words" : jHNoteContent, "incidence" : jHNoteKeywords, "oddity": jHNoteOddness } }
+        jHAbstractedString = ''.join(jHNoteAbstracted)
+        jHNote = { noteid : { "words" : jHNoteContent, "incidence" : jHNoteKeywords, "oddity": jHNoteOddness, "abstracted": jHAbstractedString } }
         self.jMaster = heur.appendToMaster(4,self.jMaster, jHNoteKeywords)
         self.jMaster = heur.appendToMaster(4,self.jMaster, jHNoteOddness)
         self.jHeuristics.append(jHNote)
+        self.jAbstracted += "|" + jHAbstractedString
 
             
         Note = {

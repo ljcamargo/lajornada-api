@@ -11,7 +11,7 @@ from datetime import datetime
 class Updater(object):
 
     def __init__(self): 
-        print "finding news updates..."
+        #print "finding news updates..."
         self.updates = []      
         self.current = ""
         self.prev = ""
@@ -29,7 +29,7 @@ class Updater(object):
         prev = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'prev.json'
             
         if os.path.isfile(current):
-            print "getting file: " + current
+            #print "getting file: " + current
             f = open(current, 'r')
             self.current = f.read()
             f.close()
@@ -128,10 +128,9 @@ class Updater(object):
         self.pushUpdates()
     
     def pushUpdates(self):
-        print "sending update string"
         pushtxt = ';'.join(self.updates)
         push = NotificationsManager()
-        print pushtxt
+        #print pushtxt
         push.sendPushToUserList("default", pushtxt, "La Jornada")
         
             

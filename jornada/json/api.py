@@ -15,7 +15,7 @@ from jornada.push.notifications import NotificationsManager
 
 class Api(object):
 
-    def __init__(self, family="", section="", mtype="", txt="", noteid="", year="", month="", day="", detail="", richness="html", source="impresa",
+    def __init__(self, family="", section="", mtype="", txt="", noteid="", date="", detail="", richness="html", source="impresa",
                  action="", user=""):
         self.DETAIL_NO_CONTENT = "nocontent"
         self.DETAIL_MINIMAL = "minimal"
@@ -26,9 +26,7 @@ class Api(object):
         self.type = mtype if mtype != None else ""
         self.txt = txt if txt != None else ""
         self.noteid = noteid if noteid != None else ""
-        self.year = year if year != None else ""
-        self.month = month if month != None else ""
-        self.day = day if day != None else ""
+        self.date = date if date != None else ""
         self.detail = detail if detail != None else ""
         self.richness = richness if (richness != None or richness == "") else "html"
         self.source = source if source != None else "impresa"
@@ -58,7 +56,11 @@ class Api(object):
         if not self.source in ['impresa','ultimas','updates']:
             self.detail = 'impresa'
                   
-        if self.year=="" or self.month=="" or self.day=="":
+        if self.date!="":
+            self.day,self.month,self.year = self.date.split('/')
+            if not self.validateDate():
+                self.getDate()
+        else:
             self.getDate()
             
         if self.source == "updates":
@@ -80,9 +82,14 @@ class Api(object):
             self.getjsonCurrent()
             if len(self.json)>1:
                 self.runrequest()
-            
+    
+    def validateDate(self):
+        if self.year>2000 and self.year < dayt().year:
+            if self.month<12 and self.month >0:
+                if self.day<31 and self.day >0:
+                    return True
         
-    def getDate(self):
+    def getToday(self):
         now = dayt.now()
         self.year = str(now.year)
         self.month = str(now.month)
@@ -267,7 +274,7 @@ class Api(object):
 
                       
 if __name__ == '__main__':
-    miapi =Api(source="ultimas")
+    miapi =Api(action="unregpush",user="lalala")
     print miapi.getResult()
     
     

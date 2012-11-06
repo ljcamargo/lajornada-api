@@ -16,16 +16,18 @@ from operator import itemgetter
 from linguistics.gramatics.esp import ESP
 from linguistics.gramatics.heuristics import Heuristics
 from datetime import timedelta, datetime
+import datetime as datetime2
 from feedparser import FeedParser
 
 class Impresa(FeedParser):
     
     def __init__(self, minus=0, day=0, month=0, year=0):
-        now = datetime.now()
-        if (day!=0 or month!=0 or year!=0):
-            now = datetime.now()
+        if (day!=0 and month!=0 or year!=0):
+            now = datetime2.date(year, month, day)  
         elif minus!=0:
-            now = datetime.now()-timedelta(days=minus)        
+            now = datetime.now()-timedelta(days=minus)   
+        else:
+            now = datetime.now()  
         status="success"
         self.server = "unam"
         self.year = str(now.year)
@@ -44,15 +46,18 @@ class Impresa(FeedParser):
         self.Keywords = defaultdict(int)
         self.jAnalytics = []
         self.jHeuristics = []
+        self.jAbstracted = ""
         self.jMaster = defaultdict(int)
         
-
-        jItems = self.getNoteItemsFromDir(jItems)
-        jItems = self.getNoteItemsFromPortada(jItems)
-        jItems = self.getNoteItemsFromContra(jItems)
-        jItems = self.getNoteItemsFromCartones(jItems)
-        jItems = self.getNoteItemsFromAudioN(jItems)
-   
+        try:
+            jItems = self.getNoteItemsFromDir(jItems)
+            jItems = self.getNoteItemsFromPortada(jItems)
+            jItems = self.getNoteItemsFromContra(jItems)
+            jItems = self.getNoteItemsFromCartones(jItems)
+            jItems = self.getNoteItemsFromAudioN(jItems)
+        except:
+            pass
+        
         date = "" + str(self.year) + "/" + str(self.month) + "/" + str(self.day)
         orderedItems = sorted(jItems, key=itemgetter('index'))
         jOmNews = { 
@@ -92,7 +97,8 @@ class Impresa(FeedParser):
                     "incidence" : self.jMaster,
                     "oddity" : self.Entropy,
                     "keywords": self.Keywords,
-                    "content" : self.jHeuristics
+                    "content" : self.jHeuristics,
+                    "abstracted" : self.jAbstracted
                     }
             self.dumpJsonHeuristics(self.jAnalytics)
         except Exception as error2:
@@ -579,4 +585,4 @@ class Impresa(FeedParser):
     
                
 if __name__ == '__main__':
-    Impresa()
+    Impresa(1,17,10,2012)

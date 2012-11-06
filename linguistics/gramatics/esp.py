@@ -49,6 +49,7 @@ class ESP(Language):
             'exclusive':   (u'sino', u'sino que', u'antes bien', u'al contrario'),
             'disyuntives': (u'o', u'u'),
             'explicative': (u'osea', u'esto es', u'es decir', u'mejor dicho', u'es más'),
+            'logic':      (u'si')
          },
          'pronouns': {
              'tonic':               (u'yo', u'tú', u'vos', u'usted', u'él', u'ella', u'ello', u'nosotros', u'nosotras', u'ustedes', u'vosotros', u'vosotras', u'ellos', u'ellas'),
@@ -64,7 +65,6 @@ class ESP(Language):
          }, 
          'other': {
              'synthagmal': (u'al', u'del'),
-             'logic':      (u'si',),
              'lownum':     (u'1', u'2', u'3', u'4', u'5', u'6', u'7', u'8', u'9', u'10', u'11', u'12', u'13', u'14', u'15'),
          },         
          'commonverbs': {
@@ -106,5 +106,144 @@ class ESP(Language):
         if DEBUG: print u'entrpy: %s = %i' % (word, score) 
         
         return score
+    
+    def preSoftProcess(self, text):
+        text = re.sub(u'[\(\)\[\]\'\"¿¡?!,;.]','',text)
+        return text
+    
+    def preProcess(self, text):
+        text = re.sub(u'[\(\)\[\]\'\"]','',text)
+        text = re.sub(u'[?!]',',',text)
+        text = re.sub(u'[¡¿]','',text)
+        text = re.sub(u'[#$%&]','',text)
+        return text
+    
+    def abstractToPhonetics(self, text):
+        text = text.replace(u"á","a")
+        text = text.replace(u"é","e")
+        text = text.replace(u"í","i")
+        text = text.replace(u"ó","o")
+        text = text.replace(u"ú","ú")
+        text = text.replace(u"h","")
+        text = text.replace(u"ll","y")
+        text = text.replace(u"qu","c")
+        text = text.replace(u"gu","j")
+        text = text.replace(u"gü","ju")
+        text = re.sub(u'[mnñ]','m',text)
+        text = re.sub(u'[bdpt]','b',text)
+        text = re.sub(u'[ckqg]','m',text)
+        text = re.sub(u'[szyx]','s',text)
+        text = re.sub(u'[iuw]','i',text)
+        text = re.sub(u'[1234567890]','0',text)
+        return text
+    
+    def collapseRedundant(self, text):
+        text = text.replace(u"aa","a")
+        text = text.replace(u"bb","b")
+        text = text.replace(u"cc","c")
+        text = text.replace(u"ee","e")
+        text = text.replace(u"ff","f")
+        text = text.replace(u"ii","i")
+        text = text.replace(u"jj","j")
+        text = text.replace(u"ll","l")
+        text = text.replace(u"mm","m")
+        text = text.replace(u"oo","o")
+        text = text.replace(u"rr","r")
+        text = text.replace(u"ss","s")
+        text = text.replace(u"00","0")
+        text = text.replace(u"baba","ba")
+        text = text.replace(u"bebe","be")
+        text = text.replace(u"bibi","bi")
+        text = text.replace(u"bobo","bo")
+        text = text.replace(u"mama","ma")
+        text = text.replace(u"meme","me")
+        text = text.replace(u"mimi","mi")
+        text = text.replace(u"momo","mo")
+        text = text.replace(u"caca","ca")
+        text = text.replace(u"cece","ce")
+        text = text.replace(u"cici","ci")
+        text = text.replace(u"coco","co")
+        text = text.replace(u"sasa","sa")
+        text = text.replace(u"sese","se")
+        text = text.replace(u"sisi","si")
+        text = text.replace(u"soso","so")
+        text = text.replace(u"rara","ra")
+        text = text.replace(u"rere","re")
+        text = text.replace(u"riri","ri")
+        text = text.replace(u"roro","ro")
+        text = text.replace(u"lala","la")
+        text = text.replace(u"lele","le")
+        text = text.replace(u"lili","li")
+        text = text.replace(u"lolo","lo")
+        text = text.replace(u"yaya","ya")
+        text = text.replace(u"yeye","ye")
+        text = text.replace(u"yiyi","yi")
+        text = text.replace(u"yoyo","yo")
+        text = text.replace(u"jaja","ja")
+        text = text.replace(u"jeje","je")
+        text = text.replace(u"jiji","ji")
+        text = text.replace(u"jojo","jo")
+        text = text.replace(u"fafa","fa")
+        text = text.replace(u"fefe","fe")
+        text = text.replace(u"fifi","fi")
+        text = text.replace(u"fofo","fo")
+        return text
 
+    def condenseSyllabs(self, text):
+        text = text.replace(u"ba","b")
+        text = text.replace(u"be","B")
+        text = text.replace(u"bi","v")
+        text = text.replace(u"bo","V")
+        text = text.replace(u"ma","m")
+        text = text.replace(u"me","M")
+        text = text.replace(u"mi","n")
+        text = text.replace(u"mo","N")
+        text = text.replace(u"ca","c")
+        text = text.replace(u"ce","C")
+        text = text.replace(u"ci","k")
+        text = text.replace(u"co","K")
+        text = text.replace(u"sa","s")
+        text = text.replace(u"se","S")
+        text = text.replace(u"si","z")
+        text = text.replace(u"so","Z")
+        text = text.replace(u"ra","r")
+        text = text.replace(u"re","R")
+        text = text.replace(u"ri","h")
+        text = text.replace(u"ro","H")
+        text = text.replace(u"la","l")
+        text = text.replace(u"le","L")
+        text = text.replace(u"li","d")
+        text = text.replace(u"lo","D")
+        text = text.replace(u"ya","y")
+        text = text.replace(u"ye","Y")
+        text = text.replace(u"yi","x")
+        text = text.replace(u"yo","X")
+        text = text.replace(u"ja","j")
+        text = text.replace(u"je","J")
+        text = text.replace(u"ji","t")
+        text = text.replace(u"jo","T")
+        text = text.replace(u"fa","f")
+        text = text.replace(u"fe","F")
+        text = text.replace(u"fi","w")
+        text = text.replace(u"fo","W")
+        return text
+    
+    def condenseDipthonge(self, text):
+        text = text.replace(u"ia","A")
+        text = text.replace(u"ie","E")
+        text = text.replace(u"io","O")
+        text = text.replace(u"ii","I")
+        text = text.replace(u"aa","Á")
+        text = text.replace(u"ae","É")
+        text = text.replace(u"ai","Í")
+        text = text.replace(u"ao","O")
+        text = text.replace(u"ea","á")
+        text = text.replace(u"ee","é")
+        text = text.replace(u"ei","í")
+        text = text.replace(u"eo","é")
+        text = text.replace(u"oa","u")
+        text = text.replace(u"oe","U")
+        text = text.replace(u"ii","ú")
+        text = text.replace(u"io","Ú")
+        return text
         

@@ -16,11 +16,17 @@ class Heuristics(object):
     
     #POINTER
     
+    def _processAbstraction(self, text, list):
+        words = text.split()
+        for word in words:
+            self._appendWordToAbstractedString(word, list)
+    
     def _matchArrayToList(self, textl, list):
             for text in textl:
                 self._matchTextToList(text, list)
             
     def _matchTextToList(self, text, list):
+        text = re.sub(u'[\(\)\[\]\'\"¿¡?!,;]','',text)
         words = text.split()
         for word in words:
             self._appendWordToList(word, list)
@@ -30,19 +36,19 @@ class Heuristics(object):
             self._matchTextToDict(text, dict)
         
     def _matchTextToDict(self, text, dict):
+        text = re.sub(u'[\(\)\[\]\'\"¿¡?!,;]','',text)
         words = text.split()
         for word in words:
             self._appendWordToFreqDict(word, dict)
 
     def _proccessOddness(self, text, dict):
+        text = re.sub(u'[\(\)\[\]\'\"¿¡?!,;]','',text)
         words = text.split()
         for word in words:
             self._calcWordOddness(word, dict)
     
     
     def _appendWordToList(self, text, list):
-        text = text.replace("(","")
-        text = text.replace(")","")
         isIn = False
         for litem in list:
             if litem == text: 
@@ -53,8 +59,7 @@ class Heuristics(object):
                 list.append(text)  
     
     def _appendWordToFreqDict(self, text, dict):
-        text = text.replace("(","")
-        text = text.replace(")","")
+        text = re.sub(u'[\(\)\[\]\'\"¿¡?!,;]','',text)
         if dict.has_key(text):
             dict[text] += 1
         else:
@@ -63,6 +68,7 @@ class Heuristics(object):
                 dict[text] = 1
     
     def _calcWordOddness(self, text, dict):
+        text = re.sub(u'[\(\)\[\]\'\"¿¡?!,;]','',text)
         if dict.has_key(text):
             pass
         else:
@@ -70,6 +76,50 @@ class Heuristics(object):
             dict[text] = lang.wordOddnessScore(text)
     
     
+    def _appendWordToAbstractedString(self, text, list):
+        lang = LANG()
+        cat = lang.abstractCategory(text)
+        if len(cat)>0:
+            text = cat
+        else:
+            text = text.lower()
+            text = lang.preProcess(text)
+            text = lang.abstractToPhonetics(text)
+            text = lang.collapseRedundant(text)
+            text = lang.condenseSyllabs(text)
+            text = lang.condenseDipthonge(text)
+        list.append(text)
+        
+    def makeAbstractList(self, list):
+        lang = LANG()
+        nlist = []
+        for text in list:
+            cat = lang.abstractCategory(text)
+            if len(cat)>0:
+                text = cat
+            else:
+                text = text.lower()
+                text = lang.preProcess(text)
+                text = lang.abstractToPhonetics(text)
+                text = lang.collapseRedundant(text)
+                text = lang.condenseSyllabs(text)
+                text = lang.condenseDipthonge(text)
+            nlist.append(text)
+        return nlist
+        
+    def getAbstractedString(self, text):
+        lang = LANG()
+        cat = lang.abstractCategory(text)
+        if len(cat)>0:
+            text = cat
+        else:
+            text = text.lower()
+            text = lang.preProcess(text)
+            text = lang.abstractToPhonetics(text)
+            text = lang.collapseRedundant(text)
+            text = lang.condenseSyllabs(text)
+            text = lang.condenseDipthonge(text)
+        list.append(text)
     
     def selectHigherKeywords(self, infra, dict):
         for k,v in dict.iteritems():
@@ -85,6 +135,23 @@ class Heuristics(object):
                 else:
                     master[k] = v
         return master
+    
+    def _appendAdditiveToMaster(self, infra, master, dict):
+        for k,v in dict.iteritems():
+            if v>infra:
+                if master.has_key(k):
+                    master[k] += v
+                else:
+                    master[k] = v
+                    
+    def _appendCompetitiveToMaster(self, infra, master, dict):
+        for k,v in dict.iteritems():
+            if v>infra:
+                if master.has_key(k):
+                    nv = v if v>master[k] else master[k]
+                    master[k] = nv
+                else:
+                    master[k] = v
     
     def stripWordEnclousureMarks(self, word):
         list = "()[]{}'\""
