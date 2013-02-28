@@ -154,7 +154,29 @@ class FeedParser(parsing):
         return r
     
     def getNavUrl(self, id):
-        r = "http://www.jornada.unam.mx/"+self.year+"/"+self.month+"/"+self.day+"/"  + id
+        section = ""
+        if len(id)<1 : id = ""
+        if "pol" in id:
+            section = "politica"
+        if "eco" in id:
+            section = "economia"
+        if "est" in id:
+            section = "estados"  
+        if "mun" in id:
+            section = "mundo"
+        if "cap" in id:
+            section = "capital"
+        if "soc" in id:
+            section = "sociedad"
+        if "cul" in id:
+            section = "cultura"
+        if "cie" in id:
+            section = "ciencias"
+        if "esp" in id:
+            section = "espectaculos"   
+        if "dep" in id:
+            section = "deportes"                                                                                                             
+        r = "http://www.jornada.unam.mx/"+section+"/"+self.year+"/"+self.month+"/"+self.day+"/"  + id
         return r
     
     def getUNavUrl(self, id):
@@ -210,6 +232,7 @@ class FeedParser(parsing):
         jHNoteOddness = defaultdict(int)
         jHNoteKeywords = defaultdict(int)
         jHNoteAbstracted = []
+        jHNoteFinalKeywords = []
         filestr = self.getHttpNoteResourceString('articulo', noteid)
         xmldoc = minidom.parseString(filestr)
         
@@ -258,7 +281,9 @@ class FeedParser(parsing):
         
             
         jHAbstractedString = ''.join(jHNoteAbstracted)
-        jHNote = { noteid : { "words" : jHNoteContent, "incidence" : jHNoteKeywords, "oddity": jHNoteOddness, "abstracted": jHAbstractedString } }
+        heur._matchDictToList(jHNoteKeywords, jHNoteFinalKeywords)
+        heur._matchDictToList(jHNoteOddness, jHNoteFinalKeywords)
+        jHNote = { noteid : { "words" : jHNoteContent, "incidence" : jHNoteKeywords, "oddity": jHNoteOddness, "abstracted": jHAbstractedString, "keywords": jHNoteFinalKeywords } }
         self.jMaster = heur.appendToMaster(4,self.jMaster, jHNoteKeywords)
         self.jMaster = heur.appendToMaster(4,self.jMaster, jHNoteOddness)
         self.jHeuristics.append(jHNote)
@@ -272,9 +297,9 @@ class FeedParser(parsing):
                  "byline": byline,
                  "abstract": abstract,
                  "text": text,
-                 "images": imgs
+                 "images": imgs,
+                 "keywords": jHNoteFinalKeywords
         } 
-        
         
         
 

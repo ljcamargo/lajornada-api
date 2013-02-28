@@ -13,6 +13,7 @@ encoding//jornada/json/parsing.py=utf-8
 encoding//jornada/json/search.py=utf-8
 encoding//jornada/json/server.py=utf-8
 encoding//jornada/json/ultimas.py=utf-8
+encoding//jornada/json/ultimasPortadaXml.py=utf-8
 encoding//jornada/json/updater.py=utf-8
 encoding//jornada/json/zeitung.py=utf-8
 encoding//jornada/push/notifications.py=utf-8

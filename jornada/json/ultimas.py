@@ -73,7 +73,7 @@ class Ultimas(FeedParser):
         j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
         filename = const.SAVING_ROUTE + '/' +  const.SAVING_NAME_CURRENT + 'last.json'
         f = open(filename, 'w')
-        print 'Escribiendo archivo: %s' % filename
+        print 'writting: %s' % filename
         f.write(j)
         f.close()
         
@@ -315,7 +315,7 @@ class Ultimas(FeedParser):
             "plain" : self.getRecursiveText(titlelst),
             "list" : self.getListItems(titlelst)
                  }
-        self.appendNodeToHeuristics(heur,titlelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)
+        #self.appendNodeToHeuristics(heur,titlelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)
         
         hedlinelst = xmldoc.getElementsByTagName('hedline')[0].childNodes
         hedline = {
@@ -323,7 +323,8 @@ class Ultimas(FeedParser):
             "plain" : self.getRecursiveText(hedlinelst),
             "list" : self.getListItems(hedlinelst)         
                 }
-        self.appendNodeToHeuristics(heur,hedlinelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)        
+        
+        #self.appendNodeToHeuristics(heur,hedlinelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)        
         
         byline = self.getRecursiveText(xmldoc.getElementsByTagName('byline')[0].childNodes[0])
         
@@ -333,7 +334,8 @@ class Ultimas(FeedParser):
             "plain" : self.getRecursiveText(abstractlst),
             "list" : self.getListItems(abstractlst)
             }
-        self.appendNodeToHeuristics(heur,abstractlst, jHNoteContent, jHNoteOddness, jHNoteKeywords)
+        
+        #self.appendNodeToHeuristics(heur,abstractlst, jHNoteContent, jHNoteOddness, jHNoteKeywords)
         
         bodycontent = xmldoc.getElementsByTagName('body.content')[0].childNodes
         text = {

@@ -59,12 +59,12 @@ class ESP(Language):
              'reflexive':           (u'me', u'nos', u'te', u'os', u'se'),
              'posesive':            (u'mío', u'mía', u'míos', u'mías', u'tuyo', u'tuya', u'tuyos', u'tuyas', u'suyo', u'suya', u'suyos', u'suyas', u'nuestro', u'nuestra', u'nuestros', u'nuestras', u'vuestro', u'vuestra', u'vuestros', u'vuestras'),
              'posesive':            (u'mío', u'mía', u'míos', u'mías', u'tuyo', u'tuya', u'tuyos', u'tuyas', u'suyo', u'suya', u'suyos', u'suyas', u'nuestro', u'nuestra', u'nuestros', u'nuestras', u'vuestro', u'vuestra', u'vuestros', u'vuestras'),
-             'demostrative':        (u'éste', u'ésta', u'esto', u'éstos', u'éstas', u'ése', u'ésa', u'eso', u'ésos', u'ésas', u'aquel', u'aquella', u'aquello', u'aquéllos', u'aquéllas'),
+             'demostrative':        (u'ese',u'este',u'éste', u'ésta', u'esto', u'éstos', u'éstas', u'ése', u'ésa', u'eso', u'ésos', u'ésas', u'aquel', u'aquella', u'aquello', u'aquéllos', u'aquéllas'),
              'relative':            (u'que', u'cual', u'cuales', u'donde', u'quien', u'quienes', u'cuyo', u'cuya', u'cuyos', u'cuyas'),
              'numeral':             (u'doble', u'triple', u'cuádruple'),
          }, 
          'other': {
-             'synthagmal': (u'al', u'del'),
+             'synthagmal': (u'al', u'del', u'porque','vez'),
              'lownum':     (u'1', u'2', u'3', u'4', u'5', u'6', u'7', u'8', u'9', u'10', u'11', u'12', u'13', u'14', u'15'),
          },         
          'commonverbs': {
@@ -78,14 +78,20 @@ class ESP(Language):
                        u'estuviese', u'estuvieses', u'estuviese', u'estuviésemos', u'estuviesen', u'estuviéseis',
                        u'estuviere', u'estuvieres', u'estuvieres', u'estuviéremos', u'estuvieren', u'estuviéreis'),
              'ser':   (u'ser', u'siendo', u'sido', u'soy', u'eres', u'es', u'somos', u'son', u'sois',
-                       u'fuí', u'fuiste', u'fué', u'fuimos', u'fueron', u'fuísteis',
+                       u'fuí', u'fuiste', u'fué', u'fue',u'fuimos', u'fueron', u'fuísteis',
                        u'seré', u'serás', u'será', u'seremos', u'serán', u'seréis',
                        u'era', u'eras', u'era', u'éramos', u'eran', u'érais',
                        u'sería', u'serías', u'sería', u'seríamos', u'serían', u'seríais',
                        u'sea', u'seas', u'sea', u'seamos', u'sean', u'seais',
                        u'fuera','fueras', u'fuera', u'fuéramos', u'fueran', u'fuérais',
                        u'fuese', u'fueses','fuese', u'fuésemos', u'fuesen', u'fuéseis',
-                       u'fuere', u'fueres', u'fuere', u'fuéremos', u'fuésen', u'fuéreis')
+                       u'fuere', u'fueres', u'fuere', u'fuéremos', u'fuésen', u'fuéreis'),
+             'haber': (u'haber',u'hay,'u'he',u'has',u'ha',u'hemos',u'han',
+                       u'habré',u'habrás',u'habrá',u'habremos',u'habrán'),
+             'decir': (u'decir',u'digo',u'dices',u'dice',u'decimos',u'dicen'
+                       u'dije',u'dijiste',u'dijo',u'dijimos',u'dijeron',
+                       u'diré',u'dirás',u'dirá',u'diremos',u'dirán'),
+                         
          }                             
     }
     
@@ -103,7 +109,7 @@ class ESP(Language):
         if re.search(r'[%s]$' % self.ends, word, re.IGNORECASE): score += 1
         if re.search(r'([^%s])\1' % '|'.join(self.ccallowed), word, re.IGNORECASE): score += 1
         
-        if DEBUG: print u'entrpy: %s = %i' % (word, score) 
+        #if DEBUG: print u'entrpy: %s = %i' % (word, score) 
         
         return score
     
@@ -116,6 +122,25 @@ class ESP(Language):
         text = re.sub(u'[?!]',',',text)
         text = re.sub(u'[¡¿]','',text)
         text = re.sub(u'[#$%&]','',text)
+        text = re.sub('^\.', '', text)
+        text = re.sub('^\-', '', text)
+        text = re.sub('^\*', '', text)
+        text = re.sub('^/', '', text)
+        text = re.sub('^\.', '', text)
+        text = re.sub('^"', '', text)
+        text = re.sub('^\'', '', text)
+        text = re.sub('^,', '', text)
+        text = re.sub('\.$', '', text)
+        text = re.sub('\-$', '', text)
+        text = re.sub('/$', '', text)
+        text = re.sub('\*$', '', text)
+        text = re.sub(',$', '', text)
+        text = re.sub('"$', '', text)
+        text = re.sub('\'$', '', text)
+        text = text.replace(u"\u2018","")
+        text = text.replace(u"\u2019","")
+        text = text.replace(u"\u201c","")
+        text = text.replace(u"\u201d","")
         return text
     
     def abstractToPhonetics(self, text):
@@ -123,7 +148,7 @@ class ESP(Language):
         text = text.replace(u"é","e")
         text = text.replace(u"í","i")
         text = text.replace(u"ó","o")
-        text = text.replace(u"ú","ú")
+        text = text.replace(u"ú","u")
         text = text.replace(u"h","")
         text = text.replace(u"ll","y")
         text = text.replace(u"qu","c")
@@ -135,6 +160,16 @@ class ESP(Language):
         text = re.sub(u'[szyx]','s',text)
         text = re.sub(u'[iuw]','i',text)
         text = re.sub(u'[1234567890]','0',text)
+        return text
+    
+    def abstractTo1stLevelPhonetics(self, text):
+        text = text.replace(u"á","a")
+        text = text.replace(u"é","e")
+        text = text.replace(u"í","i")
+        text = text.replace(u"ó","o")
+        text = text.replace(u"ú","u")
+        text = text.replace(u"ñ","n")
+        text = text.replace(u"ü","u")
         return text
     
     def collapseRedundant(self, text):

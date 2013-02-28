@@ -8,6 +8,6 @@ from impresa import Impresa
           
                
 if __name__ == '__main__':
-    for x in range(1,720):
+    for x in range(31,180):
         print "minus "+str(x)
         Impresa(minus=x)

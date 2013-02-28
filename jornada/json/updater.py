@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+
+import sys, os
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+sys.path.append(path_to('../../'))
 import json
-import os
 import constants as const
 from jornada.push.notifications import NotificationsManager
 from datetime import datetime
@@ -11,11 +14,10 @@ from datetime import datetime
 class Updater(object):
 
     def __init__(self): 
-        #print "finding news updates..."
         self.updates = []      
         self.current = ""
         self.prev = ""
-                     
+        self.result = ""             
         self.getjson()
         
         if len(self.current)>1:
@@ -125,7 +127,7 @@ class Updater(object):
                "content": newcontent,
                }
         self.result =  json.dumps(jOmNews)
-        self.pushUpdates()
+        #self.pushUpdates()
     
     def pushUpdates(self):
         pushtxt = ';'.join(self.updates)
@@ -140,7 +142,7 @@ class Updater(object):
                       
 if __name__ == '__main__':
     miapi =Updater()
-    print miapi.getResult()
+    print "done"
 
  
 

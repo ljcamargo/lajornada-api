@@ -20,6 +20,11 @@ class Heuristics(object):
         words = text.split()
         for word in words:
             self._appendWordToAbstractedString(word, list)
+            
+    def _matchDictToList(self, dict, list):
+        dictkeys = dict.keys()
+        for key in dictkeys:
+            self._appendProcessedWordToList(key, list)
     
     def _matchArrayToList(self, textl, list):
             for text in textl:
@@ -29,7 +34,7 @@ class Heuristics(object):
         text = re.sub(u'[\(\)\[\]\'\"¿¡?!,;]','',text)
         words = text.split()
         for word in words:
-            self._appendWordToList(word, list)
+            self._appendWordToList(word, list)            
     
     def _matchArrayToDict(self, textl, dict):
         for text in textl:
@@ -56,7 +61,15 @@ class Heuristics(object):
         if not isIn:
             lang = LANG()
             if lang.isNounOrVerb(text):
-                list.append(text)  
+                list.append(text)
+                
+    def _appendProcessedWordToList(self, text, list):
+        isIn = False
+        for litem in list:
+            if litem == text: 
+                isIn = True
+        if not isIn:
+            list.append(text)    
     
     def _appendWordToFreqDict(self, text, dict):
         text = re.sub(u'[\(\)\[\]\'\"¿¡?!,;]','',text)
@@ -88,7 +101,7 @@ class Heuristics(object):
             text = lang.collapseRedundant(text)
             text = lang.condenseSyllabs(text)
             text = lang.condenseDipthonge(text)
-        list.append(text)
+            list.append(text)
         
     def makeAbstractList(self, list):
         lang = LANG()
@@ -105,6 +118,21 @@ class Heuristics(object):
                 text = lang.condenseSyllabs(text)
                 text = lang.condenseDipthonge(text)
             nlist.append(text)
+        return nlist
+    
+    def makeKeywordAbstractList(self, list):
+        lang = LANG()
+        nlist = []
+        for text in list:
+            cat = lang.abstractCategory(text)
+            if len(cat)>0:
+                #text = cat
+                pass
+            else:
+                text = text.lower()
+                text = lang.preProcess(text)
+                text = lang.abstractTo1stLevelPhonetics(text)
+                nlist.append(text)
         return nlist
         
     def getAbstractedString(self, text):

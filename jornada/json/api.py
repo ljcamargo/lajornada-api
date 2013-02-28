@@ -3,6 +3,7 @@
 import json
 import os
 from impresa import Impresa
+#from search import Search
 from operator import itemgetter
 from datetime import datetime as dayt
 from datetime import timedelta
@@ -33,6 +34,17 @@ class Api(object):
         self.json = "" 
         self.result = ""
         
+        ''' SEARCH SUPPORT
+        if self.action == "search":
+            print "search"
+            if not self.txt == "":
+                print "looking for: "+self.txt
+                mysearch = Search(txt=self.txt)
+                return mysearch.getResult()
+            return
+        '''
+        
+        ''' PUSH NOTIFICATIONS
         if self.action == "regpush":
             if not self.user == "":
                 pushn = NotificationsManager()
@@ -46,6 +58,7 @@ class Api(object):
                 pushn.unregId(self.user, 'default')
                 self.actionresponse(self.action, self.user, "done")
             return
+        '''
         
         if not self.richness in ['html','plain','list','all']:
             self.richness = 'html'
@@ -59,9 +72,9 @@ class Api(object):
         if self.date!="":
             self.day,self.month,self.year = self.date.split('/')
             if not self.validateDate():
-                self.getDate()
+                self.getToday()
         else:
-            self.getDate()
+            self.getToday()
             
         if self.source == "updates":
             self.runupdates()
@@ -79,6 +92,11 @@ class Api(object):
                 else:
                     self.notbeenfound()       
         elif self.source == 'ultimas':
+            self.getjsonCurrent()
+            if len(self.json)>1:
+                self.runrequest()
+                
+        elif self.source == 'w8xmltile':
             self.getjsonCurrent()
             if len(self.json)>1:
                 self.runrequest()
@@ -139,6 +157,23 @@ class Api(object):
             f.close()
         else:
             filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'prev.json'
+            if os.path.isfile(filename):
+                print "getting file: "+filename
+                f = open(filename, 'r')
+                self.json = f.read()
+                f.close()
+            else:
+                print "filenotfound "+filename
+                
+    def getjsonXmlW8(self):
+        filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'last_w8.xml'
+        if os.path.isfile(filename):
+            print "getting file: "+filename
+            f = open(filename, 'r')
+            self.json = f.read()
+            f.close()
+        else:
+            filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'prev_w8.xml'
             if os.path.isfile(filename):
                 print "getting file: "+filename
                 f = open(filename, 'r')
@@ -274,8 +309,8 @@ class Api(object):
 
                       
 if __name__ == '__main__':
-    miapi =Api(action="unregpush",user="lalala")
-    print miapi.getResult()
+    miapi =Api(source="ultimas")
+    #print miapi.getResult()
     
     
             

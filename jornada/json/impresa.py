@@ -17,7 +17,9 @@ from linguistics.gramatics.esp import ESP
 from linguistics.gramatics.heuristics import Heuristics
 from datetime import timedelta, datetime
 import datetime as datetime2
+import time
 from feedparser import FeedParser
+#from pymongo import Connection
 
 class Impresa(FeedParser):
     
@@ -41,6 +43,15 @@ class Impresa(FeedParser):
         self.snapSize = const.CONFIG_SNAPSIZE
         self.superfamily = "portada"
         
+        #MONGO DB CONN
+        #self.connection = Connection('localhost')
+        #self.db = self.connection.lajornada
+        #self.collection = self.db.lajornada_notas
+        #self.index = self.db.lajornada_index
+        #self.collection.drop()
+        #self.index.drop()
+        #return
+
         jItems = []
         self.Entropy = defaultdict(int)
         self.Keywords = defaultdict(int)
@@ -48,18 +59,21 @@ class Impresa(FeedParser):
         self.jHeuristics = []
         self.jAbstracted = ""
         self.jMaster = defaultdict(int)
+        self.lang = ESP()
+        self.heur = Heuristics("es")
         
-        try:
-            jItems = self.getNoteItemsFromDir(jItems)
-            jItems = self.getNoteItemsFromPortada(jItems)
-            jItems = self.getNoteItemsFromContra(jItems)
-            jItems = self.getNoteItemsFromCartones(jItems)
-            jItems = self.getNoteItemsFromAudioN(jItems)
-        except:
-            pass
-        
+        jItems = self.getNoteItemsFromDir(jItems)
+        jItems = self.getNoteItemsFromPortada(jItems)
+        jItems = self.getNoteItemsFromContra(jItems)
+        jItems = self.getNoteItemsFromCartones(jItems)
+        jItems = self.getNoteItemsFromAudioN(jItems)
+    
         date = "" + str(self.year) + "/" + str(self.month) + "/" + str(self.day)
         orderedItems = sorted(jItems, key=itemgetter('index'))
+        #VOLCATE TO MONGODB;
+        #for item in jItems:
+            #self.genNodeForDB(item)
+            
         jOmNews = { 
            "title": const.DELIVERY_DESCRIPTION_PRINTED,
            "publication": const.PUB_NAME,
@@ -84,10 +98,10 @@ class Impresa(FeedParser):
         self.dumpJsonItems([jOmNews])
         
         lang = ESP()
-        heur = Heuristics("es")
+        self.heur = Heuristics("es")
         for k,v in self.jMaster.iteritems():
             if lang.wordOddnessScore(k)>2:
-                k = heur.stripWordEnclousureMarks(k)
+                k = self.heur.stripWordEnclousureMarks(k)
                 self.Entropy[k]= v
         
         try:            
@@ -100,9 +114,18 @@ class Impresa(FeedParser):
                     "content" : self.jHeuristics,
                     "abstracted" : self.jAbstracted
                     }
-            self.dumpJsonHeuristics(self.jAnalytics)
+            #self.dumpJsonHeuristics(self.jAnalytics)
         except Exception as error2:
             self.dumpErrorLog(error2)
+        
+            
+    ''' DB SUPPORT
+    def upsertNoteToDB(self, Note, index):
+        print "upsert mongo "+Note['id']+"  keyw:"+'|'.join(Note['keywords'])
+        self.collection.update({'id':Note['id'], 'year':self.year,'month':self.month,'day':self.day}, Note, upsert=True)
+        self.index.update({'id':index['id'], 'timestamp':index['timestamp']}, index, upsert=True)
+        print "collection has now" + str(self.collection.count())
+    '''    
             
     def dumpJsonItems(self, jItems):
         j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
@@ -133,6 +156,27 @@ class Impresa(FeedParser):
         f = open(filename, 'w')
         f.write(j)
         f.close()
+        
+        
+    ''' DB SUPPORT     
+    def genNodeForDB(self, MongojItem):
+        MongojItem['year']=self.year
+        MongojItem['month']=self.month
+        MongojItem['day']=self.day
+        dt0 = datetime(year=2000, month=1, day=1)
+        timestamp = time.mktime(dt0.timetuple())
+        dt = datetime(year=int(self.year), month=int(self.month), day=int(self.day))
+        timestamp = time.mktime(dt.timetuple()) - timestamp
+        MongojItem['timestamp']=timestamp
+        heur = Heuristics('esp')
+        MongojItem['keywords']=heur.makeKeywordAbstractList(MongojItem['keywords'])
+        MongoIndex = {
+                      "id":MongojItem['id'],
+                      "timestamp":MongojItem['timestamp'],
+                      "keywords":MongojItem['keywords']
+        }
+        self.upsertNoteToDB(MongojItem,MongoIndex)
+    '''
         
     def getNoteItemsFromDir(self, jItems):
         family = "dir"
@@ -180,6 +224,10 @@ class Impresa(FeedParser):
             #EACH NOTE PARSING
             notecontent = self.getNoteContent(nodeid)
             
+            keywords = notecontent['keywords']
+            del notecontent['keywords']
+                        
+                        
             jItem = {
                      "id": nodeid,
                      "index":(page*order),
@@ -200,8 +248,10 @@ class Impresa(FeedParser):
                      "date": date,
                      "audio":"",
                      "images": imgs,
-                     "content": notecontent
-            }    
+                     "content": notecontent,
+                     "keywords": keywords
+            }   
+            
             jItems.append(jItem)
     
         #RAYUELA
@@ -209,11 +259,14 @@ class Impresa(FeedParser):
         section = "rayuela"
         type = "bullet"
         title = self.getRecursiveText(rayuela)
-
         abstract = ""    
+        raykw = []
+        self.heur._matchTextToList(title, raykw)
+        raykw.append('@rayuela')
+        rayid = 'ray01'
         new = {
              "id": "",
-             "index":0,
+             "index":rayid,
              "page": 0,
              "order": 0,
              "family": "contra",
@@ -231,10 +284,11 @@ class Impresa(FeedParser):
              "date": "",
              "audio":"",
              "images": [],
-             "content": []
+             "content": [],
+             "keywords": raykw
         }
-        jItems.append(new)
         
+        jItems.append(new)
         jItems= sorted(jItems,  key=lambda k: k['order'])   
         return jItems
     
@@ -304,7 +358,8 @@ class Impresa(FeedParser):
                          "date": date,
                          "audio":"",
                          "images": preimgs,
-                         "content": jItems[i].get('content')
+                         "content": jItems[i].get('content'),
+                         "keywords": jItems[i].get('keywords') 
                     }
                     jItems[i] = new
                     x += 1
@@ -312,7 +367,7 @@ class Impresa(FeedParser):
         orphanpics = xmldoc.getElementsByTagName('foto')
         y = 0
         for node in orphanpics:
-            nodeid = ""
+            nodeid = "foto"+str(y)
             noteXmlUrl =  ""
             section = ""
             stype = "foto"
@@ -326,6 +381,9 @@ class Impresa(FeedParser):
             ikind = "main"
             url = self.getImgUrl(node.getAttribute('src'))
             snap = self.getSnapUrl(node.getAttribute('src'))
+            keywords = []
+            self.heur._matchTextToList(caption, keywords)
+            self.heur._matchTextToList(header, keywords)
             img = {
                    "id":node.getAttribute('src'),
                    "url":url,
@@ -358,7 +416,8 @@ class Impresa(FeedParser):
                  "date": date,
                  "audio":"",
                  "images": imgs,
-                 "content": []
+                 "content": [],
+                 "keywords": keywords
             }
             jItems.append(new)
             y += 1
@@ -429,7 +488,8 @@ class Impresa(FeedParser):
                          "date": date,
                          "audio":"",
                          "images": preimgs,
-                         "content": jItems[i].get('content')
+                         "content": jItems[i].get('content'),
+                         "keywords": jItems[i].get('keywords')
                     }
                     jItems[i] = new
                     x += 1 
@@ -438,7 +498,7 @@ class Impresa(FeedParser):
         
         y = 0
         for node in orphanpics:
-            nodeid = ""
+            nodeid = "foto"+str(y)
             noteXmlUrl =  ""
             section = ""
             stype = "foto"
@@ -452,6 +512,9 @@ class Impresa(FeedParser):
             ikind = "main"
             url = self.getImgUrl(node.getAttribute('src'))
             snap = self.getSnapUrl(node.getAttribute('src'))
+            keywords = []
+            self.heur._matchTextToList(caption, keywords)
+            self.heur._matchTextToList(header, keywords)
             img = {
                    "id":node.getAttribute('src'),
                    "url":url,
@@ -484,7 +547,8 @@ class Impresa(FeedParser):
                  "date": date,
                  "audio":"",
                  "images": imgs,
-                 "content": []
+                 "content": [],
+                 "keywords": keywords
             }
             jItems.append(new) 
             y +=1                               
@@ -525,6 +589,10 @@ class Impresa(FeedParser):
             imgs = []
             ikind = "main"
             
+            keywords = []
+            self.heur._matchTextToList(ccaption, keywords)
+            self.heur._matchTextToList(cauthor, keywords)
+            keywords.append('@cartones')
             img = {
                        "id":curl,
                        "url":curl,
@@ -557,7 +625,8 @@ class Impresa(FeedParser):
                          "date": "",
                          "audio":"",
                          "images": img,
-                         "content": []
+                         "content": [],
+                         "keywords": keywords
                     }              
                             
             jItems.append(jItem)
