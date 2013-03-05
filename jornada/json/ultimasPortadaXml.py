@@ -56,7 +56,7 @@ class UltimasXmlW8(FeedParser):
         filename = const.SAVING_ROUTE + '/' +  const.SAVING_NAME_CURRENT + 'last_w8.xml'
         f = open(filename, 'w')
         print 'writting: %s' % filename
-        f.write(self.xmlcontent)
+        f.write(self.xmlcontent.encode('utf-8'))
         f.close()
         
     def dumpErrorLog(self, error):
