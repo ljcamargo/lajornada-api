@@ -97,7 +97,7 @@ class Api(object):
                 self.runrequest()
                 
         elif self.source == 'w8xmltile':
-            self.getjsonCurrent()
+            self.getjsonXmlW8()
             if len(self.json)>1:
                 self.runrequest()
     
