@@ -99,7 +99,7 @@ class Api(object):
         elif self.source == 'w8xmltile':
             self.getjsonXmlW8()
             if len(self.json)>1:
-                self.runrequest()
+                self.getresult()
     
     def validateDate(self):
         if self.year>2000 and self.year < dayt().year:
@@ -242,6 +242,9 @@ class Api(object):
         updater = Updater()
         updater.runrequest() 
         self.result = updater.getResult()
+        
+    def getresult(self):
+        self.result = self.json
         
     def runrequest(self):
         try:
