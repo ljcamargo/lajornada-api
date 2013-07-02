@@ -39,9 +39,9 @@ class Ultimas(FeedParser):
         
         jItems = []
         
-        jItems = self.getNoteItemsFromUDir(jItems)
         jItems = self.getNoteItemsFromUPortada(jItems)
-   
+        jItems = self.getNoteItemsFromUDir(jItems)
+        
         date = now.strftime("%Y-%m-%d %H:%M:%S")
         orderedItems = sorted(jItems, key=itemgetter('index'))
         jOmNews = { 
@@ -115,7 +115,7 @@ class Ultimas(FeedParser):
         filestr = self.getHttpResourceString('udir')
         xmldoc = minidom.parseString(filestr)
         directory = xmldoc.getElementsByTagName('Item')
-        x = 0
+        x = 100
         for node in directory:
             nodeid = node.getAttribute('id')
             noteXmlUrl =  self.getNoteUrl(nodeid)
@@ -146,9 +146,9 @@ class Ultimas(FeedParser):
             jItem = {
                      "id": nodeid,
                      "index":x,
-                     "page":0,
-                     "order":0,
-                     "priority": "",
+                     "page":1,
+                     "order":x,
+                     "priority": 6,
                      "family": family,
                      "section": section,
                      "type": type,
@@ -167,8 +167,7 @@ class Ultimas(FeedParser):
                      "content": notecontent
             }    
             jItems.append(jItem)
-    
-        
+            x += 1
         jItems= sorted(jItems,  key=lambda k: k['order'])   
         return jItems
     
@@ -187,7 +186,7 @@ class Ultimas(FeedParser):
             section = node.getAttribute('section')
             type="noticia"
             priority = node.getAttribute('type')
-            priority = self.getCorrectedType(type)
+            priority = self.getHtmlPriority(type)
             
             title = self.getRecursiveText(node.getElementsByTagName('title'))
             firstplst = node.getElementsByTagName('firstp')
@@ -203,7 +202,9 @@ class Ultimas(FeedParser):
             medialst = node.getElementsByTagName('media')
             imgs = self.getImagesObject(medialst)
                       
+            added = False
             for i in xrange(len(jItems)-1,-1,-1):
+                #LOOP ALL ITEMS
                 if jItems[i].get('id') == nodeid:
                     preimgs = jItems[i].get('images')
                     if len(preimgs)>0:
@@ -219,8 +220,8 @@ class Ultimas(FeedParser):
                     new = {
                          "id": nodeid,
                          "index":jItems[i].get('index'),
-                         "page": jItems[i].get('page'),
-                         "order": jItems[i].get('order'),
+                         "page": 0,
+                         "order": x,
                          "priority": priority,
                          "family": family,
                          "section": section,
@@ -240,7 +241,38 @@ class Ultimas(FeedParser):
                          "content": jItems[i].get('content')
                     }
                     jItems[i] = new
-                    x += 1
+                    added = True
+                else:
+                    pass
+                
+            if (added == False):               
+                #NOT ADDED, APPEND AS NEW     
+                notecontent = self.getUNoteContent(nodeid)
+                jItem = {
+                         "id": nodeid,
+                         "index":x,
+                         "page":0,
+                         "order":x,
+                         "priority": priority,
+                         "family": family,
+                         "section": section,
+                         "type": type,
+                         "noteXmlUrl": noteXmlUrl,
+                         "navUrl": navUrl,
+                         "title": title,
+                         "edTitle": title,
+                         "summary": summary,
+                         "edSummary": summary,
+                         "abstract": "",
+                         "series": "",
+                         "author": author,
+                         "date": date,
+                         "audio":"",
+                         "images": imgs,
+                         "content": notecontent
+                }    
+                jItems.append(jItem)
+            x += 1   
 
         orphanpics = xmldoc.getElementsByTagName('foto')
         y = 0
@@ -294,7 +326,10 @@ class Ultimas(FeedParser):
                  "images": imgs,
                  "content": []
             }
-            jItems.append(new)
+            
+            #HARDCODE VETOED ELEMENT: EL DIA EN IMAGENES
+            if (title!=u"El día en imágenes"):
+                jItems.append(new)
             y += 1
                                               
         jItems= sorted(jItems,  key=lambda k: k['order'])              

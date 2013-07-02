@@ -196,6 +196,19 @@ class FeedParser(parsing):
             return "noticia"
         return mtype
     
+    def getHtmlPriority(self, mtype):
+        if mtype == "h1":
+            return 5
+        if mtype == "h2":
+            return 4
+        if mtype == "h3":
+            return 3
+        if mtype == "h4":
+            return 2
+        if mtype == "h5":
+            return 1
+        return mtype
+    
     def getImagesObject(self, medialst):
         imgs = []
         url = ""; snap=""; alt = ""; caption = ""; header =""; author = ""; ikind=""; iid =""
