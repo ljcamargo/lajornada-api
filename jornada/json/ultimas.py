@@ -186,7 +186,7 @@ class Ultimas(FeedParser):
             section = node.getAttribute('section')
             type="noticia"
             priority = node.getAttribute('type')
-            priority = self.getHtmlPriority(type)
+            priority = self.getHtmlPriority(priority)
             
             title = self.getRecursiveText(node.getElementsByTagName('title'))
             firstplst = node.getElementsByTagName('firstp')
