@@ -5,20 +5,25 @@ Created on 13/05/2012
 @author: lcammx
 '''
 import sys, os
-path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
-sys.path.append(path_to('../../'))
 
 from collections import defaultdict
 from xml.dom import minidom
 import json
 import constants as const
+import logging
 from operator import itemgetter
 from linguistics.gramatics.heuristics import Heuristics
 from datetime import timedelta, datetime
 from feedparser import FeedParser
+
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+sys.path.append(path_to('../../'))
+
+
 class Ultimas(FeedParser):
     
     def __init__(self, minus=0, day=0, month=0, year=0):
+        logging.getLogger().setLevel(logging.INFO)
         now = datetime.now()
         if (day!=0 or month!=0 or year!=0):
             now = datetime.now()
@@ -73,7 +78,7 @@ class Ultimas(FeedParser):
         j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
         filename = const.SAVING_ROUTE + '/' +  const.SAVING_NAME_CURRENT + 'last.json'
         f = open(filename, 'w')
-        print 'writting: %s' % filename
+        logging.info('writting: %s' % filename)
         f.write(j)
         f.close()
         

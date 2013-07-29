@@ -2,24 +2,28 @@
 
 
 import sys, os
-path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
-sys.path.append(path_to('../../'))
+import logging
+import httplib
 import json
 import constants as const
-from jornada.push.notifications import NotificationsManager
 from datetime import datetime
 
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+sys.path.append(path_to('../../'))
 
+SERVER = 'cp.pushwoosh.com'
+BASEURL = "https://cp.pushwoosh.com/json/1.3/"
 
 class Updater(object):
 
     def __init__(self): 
+        logging.getLogger().setLevel(logging.INFO)
         self.updates = []      
         self.current = ""
         self.prev = ""
         self.result = ""             
         self.getjson()
-        
+
         if len(self.current)>1:
             if len(self.prev)>1:
                 self.runrequest()
@@ -31,21 +35,20 @@ class Updater(object):
         prev = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'prev.json'
             
         if os.path.isfile(current):
-            #print "getting file: " + current
             f = open(current, 'r')
             self.current = f.read()
             f.close()
         else:
-            print "filenotfound "+ current
+            logging.debug("filenotfound "+ current)
             
             
         if os.path.isfile(prev):
-            print "getting file: " + prev
+            logging.info("getting file: " + prev)
             f = open(prev, 'r')
             self.prev = f.read()
             f.close()
         else:
-            print "filenotfound "+ prev
+            logging.debug("filenotfound "+ prev)
             
     def notbeenfound(self):
         filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'last.json'
@@ -79,6 +82,7 @@ class Updater(object):
         pjson = json.loads(self.prev,'utf-8')
         precontent =  pjson[0]["content"]
         newcontent = []
+        foundnew = False
         
         for c in xrange(len(postcontent)-1,-1,-1):
             thisNote = postcontent[c]
@@ -91,20 +95,15 @@ class Updater(object):
                     isPresent = True
             if not isPresent:
                 del thisNote['content']
-                del thisNote['summary']
-                del thisNote['edSummary']
-                del thisNote['abstract']  
-                del thisNote['images']   
-                del thisNote['audio'] 
-                del thisNote['order']
-                del thisNote['page']
-                del thisNote['series'] 
                 
-                #ADD NOTE  
-                self.updates.append(thisNote['title'] )
-                #/ADD NOTE
-                    
-                newcontent.append(thisNote)
+                #ADD NOTE  IF RELEVANT
+                if (thisNote['type']!='foto'):      
+                    if (thisNote['family']=='uportada'):
+                        if (thisNote['order']<3):               
+                            foundnew = True
+                            self.updates.append(thisNote['title'] )
+                            self.pushThisNote(thisNote['title'], thisNote['navUrl'], thisNote['id'])       
+                
             jOmNews = { 
                "title": const.DELIVERY_DESCRIPTION_UPDATES,
                "publication": const.PUB_NAME,
@@ -126,14 +125,54 @@ class Updater(object):
                "status" : "success",   
                "content": newcontent,
                }
-        self.result =  json.dumps(jOmNews)
-        #self.pushUpdates()
+            
+        if (foundnew) :
+            logging.info("new content found and pushed")
+        else:
+            logging.info("no new content")
+
+        
+    def pushThisNote(self, text, link, noteid):
+        appcode = "EA506-AAE0E"
+        token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
+        url = BASEURL + '/createMessage'
+        request = {
+            "request":{
+                "application":appcode,
+                "auth":token,
+                "notifications":[
+                   {
+                      "send_date":"now", 
+                      "ignore_user_timezone": True,
+                      "content": text,
+                      "data": {
+                            "noteid": noteid
+                      },     
+                   }
+                ]
+            }
+        }
+        body = json.dumps(request)
+        logging.info(body)
+        code, response = self._request("POST", body, url)
+        logging.info(response)
+        dresponse = json.loads(response)
+        status = dresponse['status_code']
+        response = dresponse['status_message']
+        if code != 200:
+            logging.error("error")
+            logging.info(code)
+        else:
+            logging.info(status)
+            logging.info(response)
     
-    def pushUpdates(self):
-        pushtxt = ';'.join(self.updates)
-        push = NotificationsManager()
-        #print pushtxt
-        push.sendPushToUserList("default", pushtxt, "La Jornada")
+    def _request(self, method, body, url):
+        """ private request function """
+        connection = httplib.HTTPSConnection(SERVER)
+        headers = {'content-type': 'application/json'}
+        connection.request(method, url, body=body, headers=headers)
+        resp = connection.getresponse()
+        return resp.status, resp.read()
         
             
     def getResult(self):
@@ -141,8 +180,10 @@ class Updater(object):
 
                       
 if __name__ == '__main__':
-    miapi =Updater()
-    print "done"
+    updater =Updater()
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("update detection finished")
+    updater.pushThisNote(u"Comando ataca a federales en Aquila, Michoacán", u"http://www.jornada.unam.mx/2013/07/24//2013/07/24/14438658-comando-ataca-a-policias-federales-en-el-municipio-de-aquila", u"/2013/07/24/14438658-comando-ataca-a-policias-federales-en-el-municipio-de-aquila")
 
  
 

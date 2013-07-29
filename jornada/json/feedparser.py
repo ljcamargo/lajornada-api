@@ -5,9 +5,7 @@ Created on 13/05/2012
 @author: lcammx
 '''
 import sys, os
-path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
-sys.path.append(path_to('../../'))
-
+import logging
 from collections import defaultdict
 from xml.dom import minidom
 from parsing import parsing
@@ -17,9 +15,14 @@ import constants as const
 from linguistics.gramatics.heuristics import Heuristics
 from datetime import timedelta, datetime
 
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+sys.path.append(path_to('../../'))
+
+
 class FeedParser(parsing):
     
     def __init__(self):
+        logging.getLogger().setLevel(logging.INFO)
         pass
 
        
@@ -64,10 +67,11 @@ class FeedParser(parsing):
             'Host':s,
             'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19'
         }
-        print s+a
+        logging.info( s+a )
         conn.request("GET", a, headers=txheaders)
         r1 = conn.getresponse()
-        print r1.status, r1.reason
+        logging.info(r1.status)
+        logging.info(r1.reason)
         r = r1.read()
         return r
 
@@ -91,10 +95,11 @@ class FeedParser(parsing):
             'Host':s,
             'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19'
         }
-        print s+a
+        logging.info( s+a )
         conn.request("GET", a, headers=txheaders)
         r1 = conn.getresponse()
-        print r1.status, r1.reason
+        logging.info(r1.status)
+        logging.info(r1.reason)
         r = r1.read()
         return r
             
@@ -102,7 +107,7 @@ class FeedParser(parsing):
         j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
         filename = const.SAVING_ROUTE + '/' +  const.SAVING_NAME_PRINTED + self.year + '_' + self.month + '_' + self.day + '.json'
         f = open(filename, 'w')
-        print 'Escribiendo archivo: %s' % filename
+        logging.info( 'Writting file: %s' % filename )
         f.write(j)
         f.close()
         

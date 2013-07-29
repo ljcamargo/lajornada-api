@@ -3,14 +3,13 @@
 import json
 import os
 from impresa import Impresa
-#from search import Search
+from ultimas import Ultimas
 from operator import itemgetter
 from datetime import datetime as dayt
 from datetime import timedelta
 from multiprocessing import Pool
 import constants as const
 from updater import Updater
-from jornada.push.notifications import NotificationsManager
 
 
 
@@ -59,6 +58,10 @@ class Api(object):
                 self.actionresponse(self.action, self.user, "done")
             return
         '''
+        
+        if self.action == "updatenow":
+            Ultimas()
+            return
         
         if not self.richness in ['html','plain','list','all']:
             self.richness = 'html'
