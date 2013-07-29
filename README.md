@@ -17,3 +17,6 @@ ejecutar comando cada hora:
 
 - jornada/json/python genCurrent.py
 
+=======
+la jornada api
+
