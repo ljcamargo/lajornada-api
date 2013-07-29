@@ -15,6 +15,8 @@ SERVER = 'cp.pushwoosh.com'
 BASEURL = "https://cp.pushwoosh.com/json/1.3/"
 
 class Updater(object):
+    
+    MAX_SIM_PUSH = 3
 
     def __init__(self): 
         logging.getLogger().setLevel(logging.INFO)
@@ -83,6 +85,7 @@ class Updater(object):
         precontent =  pjson[0]["content"]
         newcontent = []
         foundnew = False
+        didpush = 0
         
         for c in xrange(len(postcontent)-1,-1,-1):
             thisNote = postcontent[c]
@@ -101,8 +104,10 @@ class Updater(object):
                     if (thisNote['family']=='uportada'):
                         if (thisNote['order']<3):               
                             foundnew = True
-                            self.updates.append(thisNote['title'] )
-                            self.pushThisNote(thisNote['title'], thisNote['navUrl'], thisNote['id'])       
+                            if (didpush<self.MAX_SIM_PUSH):
+                                self.updates.append(thisNote['title'] )
+                                self.pushThisNote(thisNote['title'], thisNote['navUrl'], thisNote['id'])
+                                didpush += 1       
                 
             jOmNews = { 
                "title": const.DELIVERY_DESCRIPTION_UPDATES,
