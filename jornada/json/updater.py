@@ -2,14 +2,17 @@
 
 
 import sys, os
+
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+sys.path.append(path_to('../../'))
+
 import logging
 import httplib
 import json
 import constants as const
 from datetime import datetime
 
-path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
-sys.path.append(path_to('../../'))
+
 
 SERVER = 'cp.pushwoosh.com'
 BASEURL = "https://cp.pushwoosh.com/json/1.3/"

@@ -6,6 +6,9 @@ Created on 13/05/2012
 '''
 import sys, os
 
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+sys.path.append(path_to('../../'))
+
 from collections import defaultdict
 from xml.dom import minidom
 import json
@@ -16,8 +19,7 @@ from linguistics.gramatics.heuristics import Heuristics
 from datetime import timedelta, datetime
 from feedparser import FeedParser
 
-path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
-sys.path.append(path_to('../../'))
+
 
 
 class Ultimas(FeedParser):

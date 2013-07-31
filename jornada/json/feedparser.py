@@ -4,7 +4,13 @@ Created on 13/05/2012
 
 @author: lcammx
 '''
+
+
 import sys, os
+
+path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
+sys.path.append(path_to('../../'))
+
 import logging
 from collections import defaultdict
 from xml.dom import minidom
@@ -15,8 +21,7 @@ import constants as const
 from linguistics.gramatics.heuristics import Heuristics
 from datetime import timedelta, datetime
 
-path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
-sys.path.append(path_to('../../'))
+
 
 
 class FeedParser(parsing):
