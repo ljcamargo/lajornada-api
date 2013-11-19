@@ -150,9 +150,9 @@ class Ultimas(FeedParser):
             author = self.getRecursiveText(node.getElementsByTagName('author'))        
             date = self.getRecursiveText(node.getElementsByTagName('versionCreated'))
             
-            #medialst = node.getElementsByTagName('media')
-            #imgs = self.getImagesObject(medialst)
-            imgs = notecontent.get('images')         
+            medialst = node.getElementsByTagName('media')
+            imgs = self.getImagesObject(medialst)
+            #imgs = notecontent.get('images')         
                           
             #NOT ADDED, APPEND AS NEW     
             
@@ -229,7 +229,7 @@ class Ultimas(FeedParser):
             }
             
         medialst = xmldoc.getElementsByTagName('media')
-        imgs = self.getImagesObject(medialst)
+        imgs = self.getNewImagesObject(medialst)
 
             
         Note = {

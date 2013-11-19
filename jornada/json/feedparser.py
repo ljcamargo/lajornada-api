@@ -260,6 +260,33 @@ class FeedParser(parsing):
             imgs.append(img)
         return imgs
            
+    def getNewImagesObject(self, medialst):
+        imgs = []
+        url = ""; snap=""; alt = ""; caption = ""; header =""; author = ""; ikind=""; iid =""
+        ikind="content"
+        for mediaitem in medialst:
+            for innermediaitem in mediaitem.childNodes:
+                if innermediaitem.nodeName == 'media-reference':
+                    iid = innermediaitem.getAttribute('source')
+                    alt = innermediaitem.getAttribute('alternate-text') 
+                if innermediaitem.nodeName == 'media-caption':
+                    caption = self.getText(innermediaitem.childNodes)
+                if innermediaitem.nodeName == 'media-producer':
+                    author = self.getText(innermediaitem.childNodes)
+            url = iid
+            snap = iid
+            img = {
+                   "id":iid,
+                   "url":url,
+                   "snap":snap,
+                   "alt":alt,
+                   "caption":caption,
+                   "header":header,
+                   "author":author,
+                   "kind":ikind,
+                   }
+            imgs.append(img)
+        return imgs
     
     def getNoteContent(self, noteid):
         heur = Heuristics('esp')
