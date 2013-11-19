@@ -131,11 +131,11 @@ class Ultimas(FeedParser):
         for node in directory:
             logging.info('element loop: %s' % x)
             _type = "noticia"
-            nodeid = node.getAttribute('id')
             noteXmlUrl =  node.getAttribute('href')
             noteNitfUrl = noteXmlUrl.replace('newsml-g2.xml','nitf')
             notecontent = self.getUNoteContent(noteNitfUrl)
             navUrl = noteXmlUrl.replace('/newsml-g2.xml','')
+            nodeid = navUrl
             section = notecontent.get("section")
             sectionname = notecontent.get("sectionName")
             priority = notecontent.get("priority")
