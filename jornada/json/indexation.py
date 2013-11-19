@@ -6,11 +6,15 @@ from linguistics.gramatics.heuristics import Heuristics
 from datetime import datetime as dayt
 import constants as const
 from collections import defaultdict
+import logging
 
 
 class Indexation(object):
 
     def __init__(self, action="", month="", year=""):
+        
+        logging.getLogger().setLevel(logging.INFO)
+        
         self.action = action if action != None else ""
         self.month = month if month != None else ""
         self.year = year if year != None else ""
@@ -76,13 +80,13 @@ class Indexation(object):
             self.day = "0"+self.day 
         filename = const.SAVING_ROUTE + '/' + const.SAVING_HEURISTICS_NAME_PRINTED + self.year + '_' + self.month + '_' + self.day + '.json'     
         if os.path.isfile(filename):
-            print "getting file: "+filename
+            logging.debug("getting file: "+ filename)
             f = open(filename, 'r')
             self.json = f.read()
             f.close()
             return True
         else:
-            print "filenotfound "+filename
+            logging.debug("filenotfound: "+ filename)
             return False
         
     def getJsonHeuristicMonth(self):
@@ -96,7 +100,7 @@ class Indexation(object):
             f.close()
             return True
         else:
-            print "filenotfound "+filename
+            logging.debug("filenotfound: "+ filename)
             return False
         
     def getJsonHeuristicYear(self):

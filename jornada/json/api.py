@@ -10,6 +10,7 @@ from datetime import timedelta
 from multiprocessing import Pool
 import constants as const
 from updater import Updater
+import logging
 
 
 
@@ -17,6 +18,9 @@ class Api(object):
 
     def __init__(self, family="", section="", mtype="", txt="", noteid="", date="", detail="", richness="html", source="impresa",
                  action="", user=""):
+        
+        logging.getLogger().setLevel(logging.INFO)
+        
         self.DETAIL_NO_CONTENT = "nocontent"
         self.DETAIL_MINIMAL = "minimal"
         self.action = action if action != None else ""
@@ -33,34 +37,11 @@ class Api(object):
         self.json = "" 
         self.result = ""
         
-        ''' SEARCH SUPPORT
-        if self.action == "search":
-            print "search"
-            if not self.txt == "":
-                print "looking for: "+self.txt
-                mysearch = Search(txt=self.txt)
-                return mysearch.getResult()
-            return
-        '''
         
-        ''' PUSH NOTIFICATIONS
-        if self.action == "regpush":
-            if not self.user == "":
-                pushn = NotificationsManager()
-                pushn.registerId(self.user, 'default')
-                self.actionresponse(self.action, self.user, "done")
-            return
-                
-        if self.action == "unregpush":
-            if not self.user == "":
-                pushn = NotificationsManager()
-                pushn.unregId(self.user, 'default')
-                self.actionresponse(self.action, self.user, "done")
-            return
-        '''
         
-        if self.action == "updatenow":
+        if self.action == "update":
             Ultimas()
+            Updater()
             return
         
         if not self.richness in ['html','plain','list','all']:
@@ -99,10 +80,6 @@ class Api(object):
             if len(self.json)>1:
                 self.runrequest()
                 
-        elif self.source == 'w8xmltile':
-            self.getjsonXmlW8()
-            if len(self.json)>1:
-                self.getresult()
     
     def validateDate(self):
         if self.year>2000 and self.year < dayt().year:
@@ -121,7 +98,7 @@ class Api(object):
             self.day = "0"+self.day 
             
     def minus1day(self):
-        print ('past date')
+        logging.debug("past date ")
         now = dayt.now()-timedelta(days=1)
         self.year = str(now.year)
         self.month = str(now.month)
@@ -130,10 +107,6 @@ class Api(object):
         self.day = str(now.day)     
         if len(self.day) < 2:
             self.day = "0"+self.day
-            
-    def asyncInvokeDailyFileGeneration(self):
-        pool = Pool(processes=1)
-        pool.apply_async(Impresa(), [], None) 
                 
     def getjsonPrinted(self):
         if self.source == "impresa":
@@ -149,41 +122,24 @@ class Api(object):
             self.json = f.read()
             f.close()
         else:
-            print "filenotfound "+filename
+            logging.debug("filenotfound "+ filename)
             
     def getjsonCurrent(self):
         filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'last.json'
         if os.path.isfile(filename):
-            print "getting file: "+filename
+            logging.debug("getting file "+ filename)
             f = open(filename, 'r')
             self.json = f.read()
             f.close()
         else:
             filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'prev.json'
             if os.path.isfile(filename):
-                print "getting file: "+filename
+                logging.debug("getting file "+ filename)
                 f = open(filename, 'r')
                 self.json = f.read()
                 f.close()
             else:
-                print "filenotfound "+filename
-                
-    def getjsonXmlW8(self):
-        filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'last_w8.xml'
-        if os.path.isfile(filename):
-            print "getting file: "+filename
-            f = open(filename, 'r')
-            self.json = f.read()
-            f.close()
-        else:
-            filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'prev_w8.xml'
-            if os.path.isfile(filename):
-                print "getting file: "+filename
-                f = open(filename, 'r')
-                self.json = f.read()
-                f.close()
-            else:
-                print "filenotfound "+filename
+                logging.debug("filenotfound "+ filename)
             
     def notbeenfound(self):
         if self.source == "impresa":
@@ -316,7 +272,6 @@ class Api(object):
                       
 if __name__ == '__main__':
     miapi =Api(source="ultimas")
-    #print miapi.getResult()
     
     
             

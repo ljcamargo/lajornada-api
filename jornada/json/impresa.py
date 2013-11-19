@@ -19,11 +19,14 @@ from datetime import timedelta, datetime
 import datetime as datetime2
 import time
 from feedparser import FeedParser
-#from pymongo import Connection
+import logging
 
 class Impresa(FeedParser):
     
     def __init__(self, minus=0, day=0, month=0, year=0):
+        
+        logging.getLogger().setLevel(logging.INFO)
+        
         if (day!=0 and month!=0 or year!=0):
             now = datetime2.date(year, month, day)  
         elif minus!=0:
@@ -43,14 +46,6 @@ class Impresa(FeedParser):
         self.snapSize = const.CONFIG_SNAPSIZE
         self.superfamily = "portada"
         
-        #MONGO DB CONN
-        #self.connection = Connection('localhost')
-        #self.db = self.connection.lajornada
-        #self.collection = self.db.lajornada_notas
-        #self.index = self.db.lajornada_index
-        #self.collection.drop()
-        #self.index.drop()
-        #return
 
         jItems = []
         self.Entropy = defaultdict(int)
@@ -70,9 +65,6 @@ class Impresa(FeedParser):
     
         date = "" + str(self.year) + "/" + str(self.month) + "/" + str(self.day)
         orderedItems = sorted(jItems, key=itemgetter('index'))
-        #VOLCATE TO MONGODB;
-        #for item in jItems:
-            #self.genNodeForDB(item)
             
         jOmNews = { 
            "title": const.DELIVERY_DESCRIPTION_PRINTED,
@@ -116,22 +108,13 @@ class Impresa(FeedParser):
                     }
             #self.dumpJsonHeuristics(self.jAnalytics)
         except Exception as error2:
-            self.dumpErrorLog(error2)
-        
-            
-    ''' DB SUPPORT
-    def upsertNoteToDB(self, Note, index):
-        print "upsert mongo "+Note['id']+"  keyw:"+'|'.join(Note['keywords'])
-        self.collection.update({'id':Note['id'], 'year':self.year,'month':self.month,'day':self.day}, Note, upsert=True)
-        self.index.update({'id':index['id'], 'timestamp':index['timestamp']}, index, upsert=True)
-        print "collection has now" + str(self.collection.count())
-    '''    
+            self.dumpErrorLog(error2)  
             
     def dumpJsonItems(self, jItems):
         j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
         filename = const.SAVING_ROUTE + '/' +  const.SAVING_NAME_PRINTED + self.year + '_' + self.month + '_' + self.day + '.json'
         f = open(filename, 'w')
-        print 'Escribiendo archivo: %s' % filename
+        logging.debug('Escribiendo archivo: %s' % filename)
         f.write(j)
         f.close()
         
@@ -156,27 +139,6 @@ class Impresa(FeedParser):
         f = open(filename, 'w')
         f.write(j)
         f.close()
-        
-        
-    ''' DB SUPPORT     
-    def genNodeForDB(self, MongojItem):
-        MongojItem['year']=self.year
-        MongojItem['month']=self.month
-        MongojItem['day']=self.day
-        dt0 = datetime(year=2000, month=1, day=1)
-        timestamp = time.mktime(dt0.timetuple())
-        dt = datetime(year=int(self.year), month=int(self.month), day=int(self.day))
-        timestamp = time.mktime(dt.timetuple()) - timestamp
-        MongojItem['timestamp']=timestamp
-        heur = Heuristics('esp')
-        MongojItem['keywords']=heur.makeKeywordAbstractList(MongojItem['keywords'])
-        MongoIndex = {
-                      "id":MongojItem['id'],
-                      "timestamp":MongojItem['timestamp'],
-                      "keywords":MongojItem['keywords']
-        }
-        self.upsertNoteToDB(MongojItem,MongoIndex)
-    '''
         
     def getNoteItemsFromDir(self, jItems):
         family = "dir"

@@ -54,7 +54,11 @@ class FeedParser(parsing):
             
         if res == "uportada":
             s = 'movil.jornada.com.mx'
-            a =  '/ultimas/portada.xml'   
+            a =  '/ultimas/portada.xml'
+            
+        if res == "newultimas":
+            s = 'www.jornada.com.mx'
+            a =  '/ultimas/newsml-g2.xml'   
             
         if res == "cartones":
             s = 'www.jornada.unam.mx'
@@ -91,6 +95,10 @@ class FeedParser(parsing):
         if res == "uarticulo":
             s = 'movil.jornada.com.mx'
             a = '/ultimas/'+ id + '.xml'
+            
+        if res == "u2articulo":
+            s = 'www.jornada.com.mx'
+            a = id.replace('http://www2.jornada.com.mx','')
             
         conn = httplib.HTTPConnection(s, timeout=240)
         txheaders = {   
@@ -190,6 +198,10 @@ class FeedParser(parsing):
         return r
     
     def getUNavUrl(self, id):
+        r = "http://www.jornada.unam.mx/"+self.year+"/"+self.month+"/"+self.day+"/"  + id
+        return r
+    
+    def getU2NavUrl(self, id):
         r = "http://www.jornada.unam.mx/"+self.year+"/"+self.month+"/"+self.day+"/"  + id
         return r
     

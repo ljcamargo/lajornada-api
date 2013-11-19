@@ -31,8 +31,10 @@ class Updater(object):
 
         if len(self.current)>1:
             if len(self.prev)>1:
+                pass
                 self.runrequest()
         else: 
+            pass
             self.notbeenfound()
                 
     def getjson(self):
@@ -109,6 +111,7 @@ class Updater(object):
                             foundnew = True
                             if (didpush<self.MAX_SIM_PUSH):
                                 self.updates.append(thisNote['title'] )
+                                logging.info("pushing %" % thisNote['title'])
                                 self.pushThisNote(thisNote['title'], thisNote['navUrl'], thisNote['id'])
                                 didpush += 1       
                 
@@ -164,13 +167,14 @@ class Updater(object):
         logging.info(body)
         code, response = self._request("POST", body, url)
         logging.info(response)
-        dresponse = json.loads(response)
-        status = dresponse['status_code']
-        response = dresponse['status_message']
+        
         if code != 200:
-            logging.error("error")
-            logging.info(code)
+            logging.error("error code->")
+            logging.error(code)
         else:
+            dresponse = json.loads(response)
+            status = dresponse['status_code']
+            response = dresponse['status_message']
             logging.info(status)
             logging.info(response)
     
@@ -189,10 +193,13 @@ class Updater(object):
                       
 if __name__ == '__main__':
     updater =Updater()
-    logging.getLogger().setLevel(logging.INFO)
-    logging.info("update detection finished")
-    updater.pushThisNote(u"Comando ataca a federales en Aquila, Michoacán", u"http://www.jornada.unam.mx/2013/07/24//2013/07/24/14438658-comando-ataca-a-policias-federales-en-el-municipio-de-aquila", u"/2013/07/24/14438658-comando-ataca-a-policias-federales-en-el-municipio-de-aquila")
-
+    #text = "Agreden comerciantes de Tepito a maestros a su paso por Eje 1 Norte"
+    #link = ""
+    #noteid = "/2013/10/17/1233818-comerciantes-de-tepito-agreden-a-maestros-a-su-paso-por-eje-1-norte"
+    #updater.pushThisNote(text, link, noteid)
+    #logging.getLogger().setLevel(logging.INFO)
+    #logging.info("update detection finished")
+    
  
 
      

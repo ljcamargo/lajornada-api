@@ -47,7 +47,6 @@ class Ultimas(FeedParser):
         jItems = []
         
         jItems = self.getNoteItemsFromUPortada(jItems)
-        jItems = self.getNoteItemsFromUDir(jItems)
         
         date = now.strftime("%Y-%m-%d %H:%M:%S")
         orderedItems = sorted(jItems, key=itemgetter('index'))
@@ -117,48 +116,56 @@ class Ultimas(FeedParser):
     
         
         
-    def getNoteItemsFromUDir(self, jItems):
-        family = "udir"
-        filestr = self.getHttpResourceString('udir')
+    
+    
+        
+    def getNoteItemsFromUPortada(self, jItems):
+        logging.info('fetch portada')
+        family = "uportada"
+        filestr = self.getHttpResourceString('newultimas')
+        logging.info('filecontent: %s' % filestr)
         xmldoc = minidom.parseString(filestr)
-        directory = xmldoc.getElementsByTagName('Item')
-        x = 100
+        directory = xmldoc.getElementsByTagName('itemRef')
+        logging.info('fetch did')
+        x = 0
         for node in directory:
+            logging.info('element loop: %s' % x)
+            _type = "noticia"
             nodeid = node.getAttribute('id')
-            noteXmlUrl =  self.getNoteUrl(nodeid)
-            navUrl = self.getUNavUrl(nodeid)
-            section = node.getAttribute('section')
-            type = node.getAttribute('type')
-            type = self.getCorrectedType(type)
-                
-            
-            title = self.getRecursiveText(node.getElementsByTagName('title'))
-
-            firstplst = node.getElementsByTagName('firstp')
+            noteXmlUrl =  node.getAttribute('href')
+            noteNitfUrl = noteXmlUrl.replace('newsml-g2.xml','nitf')
+            notecontent = self.getUNoteContent(noteNitfUrl)
+            navUrl = noteXmlUrl.replace('/newsml-g2.xml','')
+            section = notecontent.get("section")
+            sectionname = notecontent.get("sectionName")
+            priority = notecontent.get("priority")
+            title = self.getRecursiveText(node.getElementsByTagName('headline'))
+            firstplst = node.getElementsByTagName('description')
             summary = {
                 "html" :  self.getHtmlFromParragraphs(firstplst),
                 "plain" : self.getRecursiveText(firstplst),
                 "list" : self.getListItems(firstplst)
-            }
-            
+            }      
+            summary = notecontent.get('abstract')
             author = self.getRecursiveText(node.getElementsByTagName('author'))        
-            date = self.getRecursiveText(node.getElementsByTagName('date'))           
+            date = self.getRecursiveText(node.getElementsByTagName('versionCreated'))
             
             medialst = node.getElementsByTagName('media')
             imgs = self.getImagesObject(medialst)
-                
-            #EACH NOTE PARSING
-            notecontent = self.getUNoteContent(nodeid)
+                      
+                          
+            #NOT ADDED, APPEND AS NEW     
             
             jItem = {
                      "id": nodeid,
                      "index":x,
-                     "page":1,
+                     "page":0,
                      "order":x,
-                     "priority": 6,
+                     "priority": priority,
                      "family": family,
                      "section": section,
-                     "type": type,
+                     "sectionName": sectionname,
+                     "type": _type,
                      "noteXmlUrl": noteXmlUrl,
                      "navUrl": navUrl,
                      "title": title,
@@ -174,182 +181,20 @@ class Ultimas(FeedParser):
                      "content": notecontent
             }    
             jItems.append(jItem)
-            x += 1
-        jItems= sorted(jItems,  key=lambda k: k['order'])   
-        return jItems
-    
-    
-        
-    def getNoteItemsFromUPortada(self, jItems):
-        family = "uportada"
-        filestr = self.getHttpResourceString('uportada')
-        xmldoc = minidom.parseString(filestr)
-        directory = xmldoc.getElementsByTagName('Item')
-        x = 0
-        for node in directory:
-            nodeid = node.getAttribute('id')
-            noteXmlUrl =  self.getNoteUrl(nodeid)
-            navUrl = self.getUNavUrl(nodeid)
-            section = node.getAttribute('section')
-            type="noticia"
-            priority = node.getAttribute('type')
-            priority = self.getHtmlPriority(priority)
-            
-            title = self.getRecursiveText(node.getElementsByTagName('title'))
-            firstplst = node.getElementsByTagName('firstp')
-            summary = {
-                "html" :  self.getHtmlFromParragraphs(firstplst),
-                "plain" : self.getRecursiveText(firstplst),
-                "list" : self.getListItems(firstplst)
-            }      
-            
-            author = self.getRecursiveText(node.getElementsByTagName('author'))        
-            date = self.getRecursiveText(node.getElementsByTagName('date'))
-            
-            medialst = node.getElementsByTagName('media')
-            imgs = self.getImagesObject(medialst)
-                      
-            added = False
-            for i in xrange(len(jItems)-1,-1,-1):
-                #LOOP ALL ITEMS
-                if jItems[i].get('id') == nodeid:
-                    preimgs = jItems[i].get('images')
-                    if len(preimgs)>0:
-                        for ii in xrange(len(preimgs)-1,-1,-1):
-                            for iii in xrange(len(imgs)-1,-1,-1):
-                                if preimgs[ii].get('id') == imgs[iii].get('id'):
-                                    preimgs[ii] = imgs[iii]
-                                else:
-                                    preimgs.append(imgs[iii])
-
-                    else:
-                        preimgs = imgs
-                    new = {
-                         "id": nodeid,
-                         "index":jItems[i].get('index'),
-                         "page": 0,
-                         "order": x,
-                         "priority": priority,
-                         "family": family,
-                         "section": section,
-                         "type": type,
-                         "noteXmlUrl": noteXmlUrl,
-                         "navUrl": navUrl,
-                         "title": jItems[i].get('title'),
-                         "edTitle": title,
-                         "summary": jItems[i].get('summary'),
-                         "edSummary": summary,
-                         "abstract": "",
-                         "series": "",
-                         "author": author,
-                         "date": date,
-                         "audio":"",
-                         "images": preimgs,
-                         "content": jItems[i].get('content')
-                    }
-                    jItems[i] = new
-                    added = True
-                else:
-                    pass
-                
-            if (added == False):               
-                #NOT ADDED, APPEND AS NEW     
-                notecontent = self.getUNoteContent(nodeid)
-                jItem = {
-                         "id": nodeid,
-                         "index":x,
-                         "page":0,
-                         "order":x,
-                         "priority": priority,
-                         "family": family,
-                         "section": section,
-                         "type": type,
-                         "noteXmlUrl": noteXmlUrl,
-                         "navUrl": navUrl,
-                         "title": title,
-                         "edTitle": title,
-                         "summary": summary,
-                         "edSummary": summary,
-                         "abstract": "",
-                         "series": "",
-                         "author": author,
-                         "date": date,
-                         "audio":"",
-                         "images": imgs,
-                         "content": notecontent
-                }    
-                jItems.append(jItem)
             x += 1   
 
-        orphanpics = xmldoc.getElementsByTagName('foto')
-        y = 0
-        for node in orphanpics:
-            nodeid = ""
-            noteXmlUrl =  ""
-            section = ""
-            stype = "foto"
-            title = node.getAttribute('cabeza')
-            summary = []
-            series = ""
-            author = ""
-            date = ""
-            imgs = []
-            url = ""; snap=""; alt = ""; caption = ""; header =""; author = ""; ikind=""; iid =""
-            ikind = "main"
-            url = self.getImgUrl(node.getAttribute('src'))
-            snap = self.getSnapUrl(node.getAttribute('src'))
-            img = {
-                   "id":node.getAttribute('src'),
-                   "url":url,
-                   "snap":snap,
-                   "alt":node.getAttribute('cabeza'),
-                   "caption":node.getAttribute('pie'),
-                   "header":node.getAttribute('cabeza'),
-                   "author":"",
-                   "kind":ikind
-                   }
-            imgs.append(img)
-            abstract = ""    
-            new = {
-                 "id": nodeid,
-                 "index":y,
-                 "page": 0,
-                 "order": y,
-                 "priority": "",
-                 "family": family,
-                 "section": section,
-                 "type": stype,
-                 "noteXmlUrl": noteXmlUrl,
-                 "navUrl": "",
-                 "title": title,
-                 "edTitle": title,
-                 "summary": summary,
-                 "edSummary": summary,
-                 "abstract": abstract,
-                 "series": series,
-                 "author": author,
-                 "date": date,
-                 "audio":"",
-                 "images": imgs,
-                 "content": []
-            }
-            
-            #HARDCODE VETOED ELEMENT: EL DIA EN IMAGENES
-            if (title!=u"El día en imágenes"):
-                jItems.append(new)
-            y += 1
                                               
         jItems= sorted(jItems,  key=lambda k: k['order'])              
         return jItems
     
     
     def getUNoteContent(self, noteid):
-        heur = Heuristics('esp')
-        jHNoteContent = []
-        jHNoteOddness = defaultdict(int)
-        jHNoteKeywords = defaultdict(int)
-        filestr = self.getHttpNoteResourceString('uarticulo', noteid)
+        filestr = self.getHttpNoteResourceString('u2articulo', noteid)
         xmldoc = minidom.parseString(filestr)
+        
+        priority = xmldoc.getElementsByTagName('urgency')[0].getAttribute('ed-urg')
+        section = xmldoc.getElementsByTagName('pubdata')[0].getAttribute('position.section')
+        sectionslug = self.getSectionSlug(section)
         
         titlelst  = xmldoc.getElementsByTagName('title')[0].childNodes
         title = {
@@ -357,7 +202,6 @@ class Ultimas(FeedParser):
             "plain" : self.getRecursiveText(titlelst),
             "list" : self.getListItems(titlelst)
                  }
-        #self.appendNodeToHeuristics(heur,titlelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)
         
         hedlinelst = xmldoc.getElementsByTagName('hedline')[0].childNodes
         hedline = {
@@ -365,8 +209,6 @@ class Ultimas(FeedParser):
             "plain" : self.getRecursiveText(hedlinelst),
             "list" : self.getListItems(hedlinelst)         
                 }
-        
-        #self.appendNodeToHeuristics(heur,hedlinelst, jHNoteContent, jHNoteOddness, jHNoteKeywords)        
         
         byline = self.getRecursiveText(xmldoc.getElementsByTagName('byline')[0].childNodes[0])
         
@@ -392,6 +234,9 @@ class Ultimas(FeedParser):
             
         Note = {
                  "id": noteid,
+                 "priority": priority,
+                 "sectionName":section,
+                 "section": sectionslug,
                  "title": title,
                  "hedline": hedline,
                  "byline": byline,
@@ -405,6 +250,31 @@ class Ultimas(FeedParser):
 
         return Note
     
+    def getSectionSlug(self, name):
+        if (name==u'Política'):
+            return 'politica'
+        elif (name==u'Economía'):
+            return 'economia'
+        elif (name==u'Estados'):
+            return 'estados'
+        elif (name==u'Capital'):
+            return 'capital'
+        elif (name==u'Mundo'):
+            return 'mundo'
+        elif (name==u'Sociedad y Justicia'):
+            return 'economia'
+        elif (name==u'Ciencias'):
+            return 'ciencias'
+        elif (name==u'Cultura'):
+            return 'cultura'
+        elif (name==u'Espectáculos'):
+            return 'espectaculos'
+        elif (name==u'Deportes'):
+            return 'deportes'
+        elif (name==u'Multimedia'):
+            return 'multimedia'
+        else:
+            return name
     
 
            
