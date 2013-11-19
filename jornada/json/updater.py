@@ -111,7 +111,7 @@ class Updater(object):
                             foundnew = True
                             if (didpush<self.MAX_SIM_PUSH):
                                 self.updates.append(thisNote['title'] )
-                                logging.info("pushing %" % thisNote['title'])
+                                #logging.info("pushing %" % thisNote['title'])
                                 self.pushThisNote(thisNote['title'], thisNote['navUrl'], thisNote['id'])
                                 didpush += 1       
                 
