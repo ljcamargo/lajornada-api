@@ -210,8 +210,11 @@ class Ultimas(FeedParser):
             "list" : self.getListItems(hedlinelst)         
                 }
         
-        byline = self.getRecursiveText(xmldoc.getElementsByTagName('byline')[0].childNodes[0])
-        
+        try:
+            byline = self.getRecursiveText(xmldoc.getElementsByTagName('byline')[0].childNodes[0])
+        except:
+            byline = u'La Jornada'
+            
         abstractlst = xmldoc.getElementsByTagName('abstract')[0].childNodes
         abstract = {
             "html" :  self.getHtmlFromParragraphs(abstractlst),
