@@ -58,7 +58,7 @@ class FeedParser(parsing):
             
         if res == "newultimas":
             s = 'www.jornada.com.mx'
-            a =  '/ultimas/newsml-g2.xml'   
+            a =  '/ultimas/newsml-g2.xml?lala'   
             
         if res == "cartones":
             s = 'www.jornada.unam.mx'
@@ -81,7 +81,26 @@ class FeedParser(parsing):
         r1 = conn.getresponse()
         logging.info(r1.status)
         logging.info(r1.reason)
-        r = r1.read()
+        if (r1.status == 302 or r1.status == 301):
+            logging.info('follow the url')
+            s = r1.getheader('Location').replace('http://','').replace('/','')
+            logging.info(s)
+            conn2 = httplib.HTTPConnection(s, timeout=240)
+            txheaders = {   
+                'Accept':'text/html,application/xhtml+xml,application/xml',
+                'Cache-Control':'max-age=0',
+                'Connection':'keep-alive',
+                'Host':s,
+                'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19'
+            }
+            logging.info( s+a )
+            conn2.request("GET", a, headers=txheaders)
+            r2 = conn2.getresponse()
+            logging.info(r2.status)
+            logging.info(r2.reason)
+            r = r2.read()
+        else:
+            r = r1.read()
         return r
 
     def getHttpNoteResourceString(self, res, id):
@@ -113,7 +132,26 @@ class FeedParser(parsing):
         r1 = conn.getresponse()
         logging.info(r1.status)
         logging.info(r1.reason)
-        r = r1.read()
+        if (r1.status == 302 or r1.status == 301):
+            logging.info('follow the url')
+            s = r1.getheader('Location').replace('http://','').replace('/','')
+            logging.info(s)
+            conn2 = httplib.HTTPConnection(s, timeout=240)
+            txheaders = {   
+                'Accept':'text/html,application/xhtml+xml,application/xml',
+                'Cache-Control':'max-age=0',
+                'Connection':'keep-alive',
+                'Host':s,
+                'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19'
+            }
+            logging.info( s+a )
+            conn2.request("GET", a, headers=txheaders)
+            r2 = conn2.getresponse()
+            logging.info(r2.status)
+            logging.info(r2.reason)
+            r = r2.read()
+        else:
+            r = r1.read()
         return r
             
     def dumpJsonItems(self, jItems):

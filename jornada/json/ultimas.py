@@ -114,16 +114,13 @@ class Ultimas(FeedParser):
             finally:
                 to_readfile.close()
     
-        
-        
-    
-    
+
         
     def getNoteItemsFromUPortada(self, jItems):
         logging.info('fetch portada')
         family = "uportada"
         filestr = self.getHttpResourceString('newultimas')
-        logging.info('filecontent: %s' % filestr)
+        logging.info('portada ultimas newsml filecontent: %s' % filestr)
         xmldoc = minidom.parseString(filestr)
         directory = xmldoc.getElementsByTagName('itemRef')
         logging.info('fetch did')
