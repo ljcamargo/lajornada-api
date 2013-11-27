@@ -18,7 +18,8 @@ from operator import itemgetter
 from linguistics.gramatics.heuristics import Heuristics
 from datetime import timedelta, datetime
 from feedparser import FeedParser
-
+import httplib
+import urllib
 
 
 
@@ -132,6 +133,7 @@ class Ultimas(FeedParser):
             noteNitfUrl = noteXmlUrl.replace('newsml-g2.xml','nitf')
             notecontent = self.getUNoteContent(noteNitfUrl)
             navUrl = noteXmlUrl.replace('/newsml-g2.xml','')
+            #navUrl = self.getMicroURL(navUrl)
             nodeid = navUrl
             section = notecontent.get("section")
             sectionname = notecontent.get("sectionName")
@@ -249,6 +251,30 @@ class Ultimas(FeedParser):
         
 
         return Note
+    
+    def getMicroURL(self, url):
+        logging.info( url )
+        url = urllib.quote(url, '')
+        logging.info( url )
+        host = 'api-ssl.bitly.com'
+        param = '/v3/shorten?access_token=e46f80c6ed667c062da9fefc2fe410360cb9acd0&longUrl=' + url
+        conn = httplib.HTTPSConnection(host)
+        logging.info( host+param )
+        conn.request("GET", param)
+        r1 = conn.getresponse()
+        logging.info(r1.status)
+        logging.info(r1.reason)
+        newurl = url
+        response = r1.read()
+        try:
+            data = json.loads(response)
+            newurl = data['data']['url']
+            logging.info( 'shorten' )
+        except:
+            logging.info( 'no shorten' )
+            pass
+        logging.info( newurl )
+        return newurl
     
     def getSectionSlug(self, name):
         if (name==u'Política'):

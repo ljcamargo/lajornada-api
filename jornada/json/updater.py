@@ -11,7 +11,7 @@ import httplib
 import json
 import constants as const
 from datetime import datetime
-
+import urllib
 
 
 SERVER = 'cp.pushwoosh.com'
@@ -144,7 +144,9 @@ class Updater(object):
 
         
     def pushThisNote(self, text, link, noteid):
+        noteid = self.getMicroURL(noteid)
         appcode = "EA506-AAE0E"
+        #appcode = "27D11-8F224" #debugging appcode
         token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
         url = BASEURL + '/createMessage'
         request = {
@@ -188,7 +190,31 @@ class Updater(object):
         
             
     def getResult(self):
-        return self.result  
+        return self.result
+    
+    def getMicroURL(self, url):
+        logging.info( url )
+        url = urllib.quote(url, '')
+        logging.info( url )
+        host = 'api-ssl.bitly.com'
+        param = '/v3/shorten?access_token=e46f80c6ed667c062da9fefc2fe410360cb9acd0&longUrl=' + url
+        conn = httplib.HTTPSConnection(host)
+        logging.info( host+param )
+        conn.request("GET", param)
+        r1 = conn.getresponse()
+        logging.info(r1.status)
+        logging.info(r1.reason)
+        newurl = url
+        response = r1.read()
+        try:
+            data = json.loads(response)
+            newurl = data['data']['url']
+            logging.info( 'shorten' )
+        except:
+            logging.info( 'no shorten' )
+            pass
+        logging.info( newurl )
+        return newurl
 
                       
 if __name__ == '__main__':
