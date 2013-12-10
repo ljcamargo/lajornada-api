@@ -148,7 +148,7 @@ class Updater(object):
         appcode = "EA506-AAE0E"
         #appcode = "27D11-8F224" #debugging appcode
         token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
-        url = BASEURL + '/createMessage'
+        url = BASEURL + 'createMessage'
         request = {
             "request":{
                 "application":appcode,
@@ -218,13 +218,14 @@ class Updater(object):
 
                       
 if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("update detection finished")
     updater =Updater()
-    #text = "Agreden comerciantes de Tepito a maestros a su paso por Eje 1 Norte"
+    #text = u"Inicia pleno del Senado discusión de la reforma energética "
     #link = ""
-    #noteid = "/2013/10/17/1233818-comerciantes-de-tepito-agreden-a-maestros-a-su-paso-por-eje-1-norte"
+    #noteid = "http://www.jornada.unam.mx/ultimas/2013/12/10/inicia-pleno-del-senado-discusion-de-la-reforma-energetica-7051.html"
     #updater.pushThisNote(text, link, noteid)
-    #logging.getLogger().setLevel(logging.INFO)
-    #logging.info("update detection finished")
+    
     
  
 
