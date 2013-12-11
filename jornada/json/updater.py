@@ -31,7 +31,6 @@ class Updater(object):
 
         if len(self.current)>1:
             if len(self.prev)>1:
-                pass
                 self.runrequest()
         else: 
             pass
@@ -144,7 +143,7 @@ class Updater(object):
 
         
     def pushThisNote(self, text, link, noteid):
-        noteid = self.getMicroURL(noteid)
+        noteid = self.getMicroID(noteid)
         appcode = "EA506-AAE0E"
         #appcode = "27D11-8F224" #debugging appcode
         token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
@@ -181,7 +180,6 @@ class Updater(object):
             logging.info(response)
     
     def _request(self, method, body, url):
-        """ private request function """
         connection = httplib.HTTPSConnection(SERVER)
         headers = {'content-type': 'application/json'}
         connection.request(method, url, body=body, headers=headers)
@@ -191,6 +189,14 @@ class Updater(object):
             
     def getResult(self):
         return self.result
+    
+    def getMicroID(self, _id):
+        _id = _id.replace("http://www.jornada.unam.mx/ultimas/","")
+        _id = _id.replace(".html","")
+        _id = _id.replace("/","-")
+        _id = _id[11:]
+        _id = _id[:60]
+        return _id
     
     def getMicroURL(self, url):
         logging.info( url )

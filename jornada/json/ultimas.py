@@ -134,7 +134,7 @@ class Ultimas(FeedParser):
             notecontent = self.getUNoteContent(noteNitfUrl)
             navUrl = noteXmlUrl.replace('/newsml-g2.xml','')
             #navUrl = self.getMicroURL(navUrl)
-            nodeid = navUrl
+            nodeid = self.getMicroID(navUrl)
             section = notecontent.get("section")
             sectionname = notecontent.get("sectionName")
             priority = notecontent.get("priority")
@@ -251,6 +251,14 @@ class Ultimas(FeedParser):
         
 
         return Note
+    
+    def getMicroID(self, _id):
+        _id = _id.replace("http://www.jornada.unam.mx/ultimas/","")
+        _id = _id.replace(".html","")
+        _id = _id.replace("/","-")
+        _id = _id[11:]
+        _id = _id[:60]
+        return _id
     
     def getMicroURL(self, url):
         logging.info( url )
