@@ -143,7 +143,7 @@ class Updater(object):
 
         
     def pushThisNote(self, text, link, noteid):
-        noteid = self.getMicroID(noteid)
+        #noteid = self.getMicroID(noteid)
         appcode = "EA506-AAE0E"
         #appcode = "27D11-8F224" #debugging appcode
         token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
