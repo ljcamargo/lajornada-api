@@ -45,8 +45,10 @@ class Ultimas(FeedParser):
         self.snapSize = const.CONFIG_SNAPSIZE
         self.superfamily = "ultimas"
         
+        self.carousel = []
         jItems = []
         
+        self.carousel = self.getCarousel(self.carousel)
         jItems = self.getNoteItemsFromUPortada(jItems)
         
         date = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -115,11 +117,28 @@ class Ultimas(FeedParser):
             finally:
                 to_readfile.close()
     
-
+    def getCarousel(self, carousel):
+        logging.info('fetch carousel')
+        try:
+            filestr = self.getHttpResourceString('carousel')
+            logging.info(filestr)
+            precarousel = json.loads(filestr)
+            self.carousel = precarousel["carousel"]
+            return self.carousel
+        except:
+            logging.info('could not fetch carousel')
+            return self.carousel
+        
+    def noteIsPortada(self, id):
+        logging.info(id)
+        for item in self.carousel:
+            if (item["url"] == id):
+                logging.info("------------->found at carousel")
+                return True   
+        return False    
         
     def getNoteItemsFromUPortada(self, jItems):
         logging.info('fetch portada')
-        family = "uportada"
         filestr = self.getHttpResourceString('newultimas')
         logging.info('portada ultimas newsml filecontent: %s' % filestr)
         xmldoc = minidom.parseString(filestr)
@@ -133,7 +152,7 @@ class Ultimas(FeedParser):
             noteNitfUrl = noteXmlUrl.replace('newsml-g2.xml','nitf')
             notecontent = self.getUNoteContent(noteNitfUrl)
             navUrl = noteXmlUrl.replace('/newsml-g2.xml','')
-            #navUrl = self.getMicroURL(navUrl)
+            family = "uportada" if (self.noteIsPortada(navUrl)) else "udir"
             nodeid = self.getMicroID(navUrl)
             section = notecontent.get("section")
             sectionname = notecontent.get("sectionName")
@@ -149,9 +168,7 @@ class Ultimas(FeedParser):
             author = self.getRecursiveText(node.getElementsByTagName('author'))        
             date = self.getRecursiveText(node.getElementsByTagName('versionCreated'))
             
-            medialst = node.getElementsByTagName('media')
-            imgs = self.getImagesObject(medialst)
-            #imgs = notecontent.get('images')         
+            imgs = notecontent.get("images")  
                           
             #NOT ADDED, APPEND AS NEW     
             

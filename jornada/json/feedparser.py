@@ -58,7 +58,7 @@ class FeedParser(parsing):
             
         if res == "newultimas":
             s = 'www.jornada.com.mx'
-            a =  '/ultimas/newsml-g2.xml?lala'   
+            a =  '/ultimas/newsml-g2.xml'   
             
         if res == "cartones":
             s = 'www.jornada.unam.mx'
@@ -67,6 +67,10 @@ class FeedParser(parsing):
         if res == "audion":
             s = 'movil.jornada.com.mx'
             a = '/podcast/principales/'
+        
+        if res == "carousel":
+            s = 'www.jornada.unam.mx'
+            a = '/ultimas/cover-information.json'
             
         conn = httplib.HTTPConnection(s, timeout=240)
         txheaders = {   
@@ -312,7 +316,7 @@ class FeedParser(parsing):
                 if innermediaitem.nodeName == 'media-producer':
                     author = self.getText(innermediaitem.childNodes)
             url = iid
-            snap = iid
+            snap = iid + '/image_medium'
             img = {
                    "id":iid,
                    "url":url,
