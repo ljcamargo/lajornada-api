@@ -31,6 +31,9 @@ class Api(object):
         self.txt = txt if txt != None else ""
         self.noteid = noteid if noteid != None else ""
         self.date = date if date != None else ""
+        self.year = 0
+        self.day = 0
+        self.month = 0
         self.detail = detail if detail != None else ""
         self.richness = richness if (richness != None or richness == "") else "html"
         self.source = source if source != None else "impresa"
@@ -56,7 +59,9 @@ class Api(object):
         if self.date!="":
             self.day,self.month,self.year = self.date.split('/')
             if not self.validateDate():
-                self.getToday()
+                logging.debug("is valid")
+            else:
+                logging.debug("not valid")
         else:
             self.getToday()
             
@@ -68,13 +73,15 @@ class Api(object):
             self.getjsonPrinted()
             if len(self.json)>1:
                 self.runrequest()
-            else:
+            elif len(self.date) == 0:
                 self.minus1day()
                 self.getjsonPrinted()
                 if len(self.json)>1:
                     self.runrequest()
                 else:
-                    self.notbeenfound()       
+                    self.notbeenfound()
+            else:
+                self.notbeenfound()       
         elif self.source == 'ultimas':
             self.getjsonCurrent()
             if len(self.json)>1:
@@ -82,10 +89,11 @@ class Api(object):
                 
     
     def validateDate(self):
-        if self.year>2000 and self.year < dayt().year:
-            if self.month<12 and self.month >0:
-                if self.day<31 and self.day >0:
-                    return True
+        if self.year > 2000:
+            if self.year <= dayt.year:
+                if self.month<12 and self.month >0:
+                    if self.day<31 and self.day >0:
+                        return True
         
     def getToday(self):
         now = dayt.now()
@@ -117,7 +125,7 @@ class Api(object):
             filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_PRINTED + self.year + '_' + self.month + '_' + self.day + '.json'
         
         if os.path.isfile(filename):
-            print "getting file: "+filename
+            logging.debug("getting file "+ filename)
             f = open(filename, 'r')
             self.json = f.read()
             f.close()
@@ -162,7 +170,7 @@ class Api(object):
                "debug": filename,
                "status" : "noresults"
                }
-        
+        logging.debug("not found")
         self.result = json.dumps(jOmNews)
         
     def requesterror(self, error):        
@@ -184,7 +192,7 @@ class Api(object):
                "debug": error,
                "status" : "error"
                }
-        
+        logging.debug("request error")
         self.result =  json.dumps(jOmNews) 
     
     def actionresponse(self, action, param, status):        
@@ -195,6 +203,7 @@ class Api(object):
            "message": "action=" + action + "; param=" + param,
            "status" : status
            }
+        logging.debug("respoding")
         self.result =  json.dumps(jOmNews)
     
     def runupdates(self):
@@ -271,8 +280,7 @@ class Api(object):
 
                       
 if __name__ == '__main__':
-    miapi =Api(source="ultimas")
-    
+    miapi =Api(source="impresa",date="10/01/2014")
     
             
             
