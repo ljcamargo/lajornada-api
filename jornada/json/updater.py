@@ -110,7 +110,7 @@ class Updater(object):
                             foundnew = True
                             if (didpush<self.MAX_SIM_PUSH):
                                 self.updates.append(thisNote['title'] )
-                                #logging.info("pushing %" % thisNote['title'])
+                                logging.info("pushing %" % thisNote['title'])
                                 self.pushThisNote(thisNote['title'], thisNote['navUrl'], thisNote['id'])
                                 didpush += 1       
                 
@@ -144,8 +144,8 @@ class Updater(object):
         
     def pushThisNote(self, text, link, noteid):
         #noteid = self.getMicroID(noteid)
-        #appcode = "EA506-AAE0E"
-        appcode = "27D11-8F224" #debugging appcode
+        appcode = "EA506-AAE0E"
+        #appcode = "27D11-8F224" #debugging appcode
         token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
         url = BASEURL + 'createMessage'
         request = {
