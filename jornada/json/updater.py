@@ -99,18 +99,20 @@ class Updater(object):
                 preNote = precontent[d]
                 prevId = preNote.get('id')
                 if prevId == currId:
+                    logging.info("isPresent: " + currId)
                     isPresent = True
             if not isPresent:
+                logging.info("notPresent: " + currId)
                 del thisNote['content']
                 
                 #ADD NOTE  IF RELEVANT
-                if (thisNote['type']!='foto'):      
+                if (thisNote['type']!='foto'):
                     if (thisNote['family']=='uportada'):
-                        if (thisNote['order']<3):               
+                        if (thisNote['order']<3):
                             foundnew = True
                             if (didpush<self.MAX_SIM_PUSH):
                                 self.updates.append(thisNote['title'] )
-                                logging.info("pushing %" % thisNote['title'])
+                                logging.info("pushing " + thisNote['title'])
                                 self.pushThisNote(thisNote['title'], thisNote['navUrl'], thisNote['id'])
                                 didpush += 1       
                 
