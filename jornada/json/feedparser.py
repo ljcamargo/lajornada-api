@@ -72,7 +72,7 @@ class FeedParser(parsing):
             s = 'www.jornada.unam.mx'
             a = '/ultimas/cover-information.json'
             
-        conn = httplib.HTTPConnection(s, timeout=240)
+        conn = httplib.HTTPConnection(s, timeout=1280)
         txheaders = {   
             'Accept':'text/html,application/xhtml+xml,application/xml',
             'Cache-Control':'max-age=0',
@@ -89,7 +89,7 @@ class FeedParser(parsing):
             logging.info('follow the url')
             s = r1.getheader('Location').replace('http://','').replace('/','')
             logging.info(s)
-            conn2 = httplib.HTTPConnection(s, timeout=240)
+            conn2 = httplib.HTTPConnection(s, timeout=1280)
             txheaders = {   
                 'Accept':'text/html,application/xhtml+xml,application/xml',
                 'Cache-Control':'max-age=0',
@@ -97,7 +97,6 @@ class FeedParser(parsing):
                 'Host':s,
                 'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19'
             }
-            logging.info( s+a )
             conn2.request("GET", a, headers=txheaders)
             r2 = conn2.getresponse()
             logging.info(r2.status)
@@ -123,7 +122,7 @@ class FeedParser(parsing):
             s = 'www.jornada.com.mx'
             a = id.replace('http://www2.jornada.com.mx','')
             
-        conn = httplib.HTTPConnection(s, timeout=240)
+        conn = httplib.HTTPConnection(s, timeout=1280)
         txheaders = {   
             'Accept':'text/html,application/xhtml+xml,application/xml',
             'Cache-Control':'max-age=0',
@@ -131,7 +130,7 @@ class FeedParser(parsing):
             'Host':s,
             'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19'
         }
-        logging.info( s+a )
+        logging.info(a)
         conn.request("GET", a, headers=txheaders)
         r1 = conn.getresponse()
         logging.info(r1.status)
@@ -139,8 +138,7 @@ class FeedParser(parsing):
         if (r1.status == 302 or r1.status == 301):
             logging.info('follow the url')
             s = r1.getheader('Location').replace('http://','').replace('/','')
-            logging.info(s)
-            conn2 = httplib.HTTPConnection(s, timeout=240)
+            conn2 = httplib.HTTPConnection(s, timeout=1280)
             txheaders = {   
                 'Accept':'text/html,application/xhtml+xml,application/xml',
                 'Cache-Control':'max-age=0',
@@ -148,7 +146,7 @@ class FeedParser(parsing):
                 'Host':s,
                 'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19'
             }
-            logging.info( s+a )
+            logging.info(a)
             conn2.request("GET", a, headers=txheaders)
             r2 = conn2.getresponse()
             logging.info(r2.status)

@@ -280,7 +280,7 @@ class Api(object):
 
                       
 if __name__ == '__main__':
-    miapi =Api(source="impresa",date="10/01/2014")
+    miapi =Api(action="update")
     
             
             

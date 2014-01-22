@@ -138,22 +138,21 @@ class Ultimas(FeedParser):
         return False    
         
     def getNoteItemsFromUPortada(self, jItems):
-        logging.info('fetch portada')
+        logging.info('downloading uportada')
         filestr = self.getHttpResourceString('newultimas')
-        logging.info('portada ultimas newsml filecontent: %s' % filestr)
+        logging.info('did download uportada')
         xmldoc = minidom.parseString(filestr)
         directory = xmldoc.getElementsByTagName('itemRef')
-        logging.info('fetch did')
+        logging.info('did parsed uportada')
         x = 0
         for node in directory:
-            logging.info('element loop: %s' % x)
             _type = "noticia"
             noteXmlUrl =  node.getAttribute('href')
             noteNitfUrl = noteXmlUrl.replace('newsml-g2.xml','nitf')
             try:
                 notecontent = self.getUNoteContent(noteNitfUrl)
             except:
-                logging.info("note download fail!" + noteNitfUrl)
+                logging.info("note download fail! ")
                 continue
             navUrl = noteXmlUrl.replace('/newsml-g2.xml','')
             family = "uportada" if (self.noteIsPortada(navUrl)) else "udir"
