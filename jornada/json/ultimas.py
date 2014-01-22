@@ -150,7 +150,11 @@ class Ultimas(FeedParser):
             _type = "noticia"
             noteXmlUrl =  node.getAttribute('href')
             noteNitfUrl = noteXmlUrl.replace('newsml-g2.xml','nitf')
-            notecontent = self.getUNoteContent(noteNitfUrl)
+            try:
+                notecontent = self.getUNoteContent(noteNitfUrl)
+            except:
+                logging.info("note download fail!" + noteNitfUrl)
+                continue
             navUrl = noteXmlUrl.replace('/newsml-g2.xml','')
             family = "uportada" if (self.noteIsPortada(navUrl)) else "udir"
             nodeid = self.getMicroID(navUrl)

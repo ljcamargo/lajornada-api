@@ -99,10 +99,9 @@ class Updater(object):
                 preNote = precontent[d]
                 prevId = preNote.get('id')
                 if prevId == currId:
-                    logging.info("isPresent: " + currId)
                     isPresent = True
             if not isPresent:
-                logging.info("notPresent: " + currId)
+                logging.info("new Note: " + currId)
                 del thisNote['content']
                 
                 #ADD NOTE  IF RELEVANT
