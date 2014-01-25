@@ -19,7 +19,7 @@ BASEURL = "https://cp.pushwoosh.com/json/1.3/"
 
 class Updater(object):
     
-    MAX_SIM_PUSH = 3
+    MAX_SIM_PUSH = 2
 
     def __init__(self): 
         logging.getLogger().setLevel(logging.INFO)
@@ -107,13 +107,18 @@ class Updater(object):
                 #ADD NOTE  IF RELEVANT
                 if (thisNote['type']!='foto'):
                     if (thisNote['family']=='uportada'):
-                        if (thisNote['order']<3):
-                            foundnew = True
-                            if (didpush<self.MAX_SIM_PUSH):
-                                self.updates.append(thisNote['title'] )
-                                logging.info("pushing " + thisNote['title'])
-                                self.pushThisNote(thisNote['title'], thisNote['navUrl'], thisNote['id'])
-                                didpush += 1       
+                        foundnew = True
+                        if (didpush<self.MAX_SIM_PUSH):
+                            self.updates.append(thisNote['title'] )
+                            logging.info("pushing " + thisNote['title'])
+                            self.pushThisNote(thisNote['title'], thisNote['navUrl'], thisNote['id'])
+                            didpush += 1
+                        else:
+                            logging.info("max sim reached ")
+                    else:
+                        logging.info("not portada")
+                else:
+                    logging.info("is foto")
                 
             jOmNews = { 
                "title": const.DELIVERY_DESCRIPTION_UPDATES,
