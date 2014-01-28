@@ -9,7 +9,7 @@ import logging
                
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
-    for x in range(80,360):
+    for x in range(60,360):
         logging.info("minus %s" % str(x))
         print 
         try:
