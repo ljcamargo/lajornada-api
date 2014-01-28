@@ -5,9 +5,14 @@ Created on 13/05/2012
 @author: lcammx
 '''
 from impresa import Impresa
-          
+import logging
                
 if __name__ == '__main__':
-    for x in range(1,4):
-        print "minus "+str(x)
-        Impresa(minus=x)
+    logging.getLogger().setLevel(logging.INFO)
+    for x in range(80,360):
+        logging.info("minus %s" % str(x))
+        print 
+        try:
+            Impresa(minus=x)
+        except:
+            logging.info("not found")
