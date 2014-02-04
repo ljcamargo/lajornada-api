@@ -2,6 +2,7 @@
 
 
 import sys, os
+from compiler.ast import TryExcept
 
 path_to = lambda x: os.path.abspath(os.path.join(os.path.dirname(__file__), x))
 sys.path.append(path_to('../../'))
@@ -55,6 +56,20 @@ class Updater(object):
             f.close()
         else:
             logging.debug("filenotfound "+ prev)
+            
+    def getPushCurrentHistory(self):
+        path = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'current_history.json'             
+        if os.path.isfile(path):
+            f = open(path, 'r')
+            jsontxt = f.read()
+            f.close()
+            try:
+                return json.loads(jsontxt,'utf-8')
+            except:
+                logging.debug("history json error"+ path)
+        else:
+            logging.debug("history filenotfound "+ path)
+            return
             
     def notbeenfound(self):
         filename = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'last.json'
@@ -147,9 +162,52 @@ class Updater(object):
         else:
             logging.info("no new content")
 
+    def checkAlreadyPushed(self, noteid):
+        history = self.getPushCurrentHistory()
+        if (history is not None):
+            for item in history:
+                logging.info("->noteid  %s" % item["noteid"])
+                try:
+                    if (item["noteid"] == noteid):
+                        logging.info("->already pushed %s" % noteid)
+                        return True
+                except:
+                    logging.info("error checking if sent, assuming is not yet pushed")
+                    return False
+        else:
+            return False
+    
+    def registerPushed(self, text, link, noteid, request):
+        logging.info("saving push to log...")
+        path_curr = const.SAVING_ROUTE + '/' + const.SAVING_NAME_CURRENT + 'current_history.json'
+        now = datetime.now()
+        push = {
+            "text":text,
+            "link":link,
+            "noteid":noteid,
+            "time": str(now),
+            "timestamp": now.microsecond,
+            "request": request
+        }
+        history = self.getPushCurrentHistory()
+        if (history is not None):
+            history.append(push)
+            self.saveJSON(history, path_curr)
+        else:
+            history = []
+            history.append(push)
+            self.saveJSON(history, path_curr)
+    
+    def saveJSON(self, text, pathname):
+        j =  json.dumps(text, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
+        f = open(pathname, 'w')
+        f.write(j)
+        f.close()
         
     def pushThisNote(self, text, link, noteid):
-        #noteid = self.getMicroID(noteid)
+        if self.checkAlreadyPushed(noteid):
+            logging.info("skipping already pushed")
+            return
         appcode = "EA506-AAE0E"
         #appcode = "27D11-8F224" #debugging appcode
         token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
@@ -184,6 +242,7 @@ class Updater(object):
             response = dresponse['status_message']
             logging.info(status)
             logging.info(response)
+            self.registerPushed(text, link, noteid, request)
     
     def _request(self, method, body, url):
         connection = httplib.HTTPSConnection(SERVER)
