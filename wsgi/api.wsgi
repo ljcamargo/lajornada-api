@@ -29,9 +29,9 @@ def application(environ, start_response):
     output = thisapi.getResult()
     response_headers = [('Content-type', 'application/json'),
                         ('Content-Length', str(len(output)))]
-    if source == "w8xmltile":
-    	response_headers = [('Content-type', 'text/xml'),
-                        ('Content-Length', str(len(output)))]
+    if action == "pushreport":
+    	response_headers = [('Content-type', 'text/html'),
+	                    ('Content-Length', str(len(output)))]
     start_response(status, response_headers)
 
     return [output]

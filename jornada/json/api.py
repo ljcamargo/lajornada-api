@@ -2,6 +2,7 @@
 
 import json
 import os
+from pushrender import PushRender
 from impresa import Impresa
 from ultimas import Ultimas
 from operator import itemgetter
@@ -40,11 +41,13 @@ class Api(object):
         self.json = "" 
         self.result = ""
         
-        
-        
         if self.action == "update":
             Ultimas()
             Updater()
+            return
+        
+        if self.action == 'pushreport':
+            self.result = PushRender().renderCurrentPushHtml()
             return
         
         if not self.richness in ['html','plain','list','all']:
@@ -280,7 +283,8 @@ class Api(object):
 
                       
 if __name__ == '__main__':
-    miapi =Api(action="update")
+    #miapi =Api(action="update")
+    #print Api(action="pushreport").getResult()
     
             
             
