@@ -283,10 +283,9 @@ class Api(object):
 
                       
 if __name__ == '__main__':
+    pass
     #miapi =Api(action="update")
     #print Api(action="pushreport").getResult()
-    
-            
             
 
  
