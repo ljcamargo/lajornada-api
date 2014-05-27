@@ -71,7 +71,15 @@ class FeedParser(parsing):
         if res == "carousel":
             s = 'www.jornada.unam.mx'
             a = '/ultimas/cover-information.json'
-            
+
+        if res == "daily":
+            s = 'www.jornada.unam.mx'
+            a = '/ultimas/daily-news.json'            
+
+        if res == "cover":
+            s = 'www.jornada.unam.mx'
+            a = '/ultimas/cover-news.json'
+                        
         conn = httplib.HTTPConnection(s, timeout=1280)
         txheaders = {   
             'Accept':'text/html,application/xhtml+xml,application/xml',

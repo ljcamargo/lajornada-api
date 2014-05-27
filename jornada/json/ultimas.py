@@ -46,9 +46,14 @@ class Ultimas(FeedParser):
         self.superfamily = "ultimas"
         
         self.carousel = []
+        self.cover = []
+        self.daily = []
         jItems = []
         
-        self.carousel = self.getCarousel(self.carousel)
+        self.daily = self.getDaily()
+        self.carousel = self.getCarousel()
+        self.cover = self.getCover()
+
         jItems = self.getNoteItemsFromUPortada(jItems)
         
         date = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -117,17 +122,38 @@ class Ultimas(FeedParser):
             finally:
                 to_readfile.close()
     
-    def getCarousel(self, carousel):
+    def getCarousel(self):
         logging.info('fetch carousel')
         try:
             filestr = self.getHttpResourceString('carousel')
             logging.info(filestr)
             precarousel = json.loads(filestr)
-            self.carousel = precarousel["carousel"]
-            return self.carousel
+            return precarousel["carousel"]
         except:
             logging.info('could not fetch carousel')
-            return self.carousel
+            return False
+        
+    def getDaily(self):
+        logging.info('fetch daily')
+        try:
+            filestr = self.getHttpResourceString('daily')
+            logging.info(filestr)
+            predict = json.loads(filestr)
+            return predict["dailynews"]
+        except:
+            logging.info('could not fetch daily')
+            return False
+        
+    def getCover(self):
+        logging.info('fetch cover')
+        try:
+            filestr = self.getHttpResourceString('cover')
+            logging.info(filestr)
+            predict = json.loads(filestr)
+            return predict["cover"]
+        except:
+            logging.info('could not fetch cover')
+            return False       
         
     def noteIsPortada(self, id):
         logging.info(id)
@@ -135,7 +161,22 @@ class Ultimas(FeedParser):
             if (item["url"] == id):
                 logging.info("------------->found at carousel")
                 return True   
-        return False    
+        return False
+    
+    def noteIsCover(self, id):
+        logging.info(id)
+        for item in self.cover:
+            if (item["url"] == id):
+                logging.info("------------->found at cover")
+                return True   
+        return False 
+    
+    def noteGetUID(self, id):
+        logging.info(id)
+        for item in self.daily:
+            if (item["url"] == id):
+                return item["uid"]   
+        return ""   
         
     def getNoteItemsFromUPortada(self, jItems):
         logging.info('downloading uportada')
@@ -155,8 +196,11 @@ class Ultimas(FeedParser):
                 logging.info("note download fail! ")
                 continue
             navUrl = noteXmlUrl.replace('/newsml-g2.xml','')
-            family = "uportada" if (self.noteIsPortada(navUrl)) else "udir"
+            family = "ucover" if (self.noteIsCover(navUrl)) else "udir"
+            family = "uportada" if (self.noteIsPortada(navUrl)) else family
             nodeid = self.getMicroID(navUrl)
+            uid = self.noteGetUID(navUrl)
+            nodeid = uid if (uid!="") else nodeid
             section = notecontent.get("section")
             sectionname = notecontent.get("sectionName")
             priority = notecontent.get("priority")
@@ -177,6 +221,7 @@ class Ultimas(FeedParser):
             
             jItem = {
                      "id": nodeid,
+                     "uid": uid,
                      "index":x,
                      "page":0,
                      "order":x,

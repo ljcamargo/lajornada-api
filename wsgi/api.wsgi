@@ -27,11 +27,9 @@ def application(environ, start_response):
     user = escape(parameters['user'][0]) if 'user' in parameters else ""
     thisapi = Api(family,section,mtype,txt,noteid,date,detail, richness, source, action, user)
     output = thisapi.getResult()
-    response_headers = [('Content-type', 'application/json'),
-                        ('Content-Length', str(len(output)))]
+    response_headers = [('Content-type', 'application/json'),('Content-Length', str(len(output)))]
     if action == "pushreport":
-    	response_headers = [('Content-type', 'text/html'),
-	                    ('Content-Length', str(len(output)))]
+    	response_headers = [('Content-type', 'text/html'),('Content-Length', str(len(output)))]
     start_response(status, response_headers)
 
     return [output]

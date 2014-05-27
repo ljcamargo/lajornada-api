@@ -12,6 +12,7 @@ import httplib
 import json
 import constants as const
 from datetime import datetime
+import time
 import urllib
 
 
@@ -176,6 +177,24 @@ class Updater(object):
                     return False
         else:
             return False
+        
+    def purgePushHistory(self):
+        history = self.getPushCurrentHistory()
+        if (history is not None):
+            for item in history:
+                logging.info("->note time  %s" % item["time"])
+                try:
+                    timeis = datetime.strptime(item["time"], "%Y-%m-%d %H:%M:%S.%f" )
+                    now = datetime.now()
+                    logging.info(timeis)
+                    logging.info(now)
+                    delta = (now - timeis).total_seconds()
+                    logging.info(delta)
+                except:
+                    logging.info("error PURGE")
+                    return False
+        else:
+            return False
     
     def registerPushed(self, text, link, noteid, request):
         logging.info("saving push to log...")
@@ -208,8 +227,8 @@ class Updater(object):
         if self.checkAlreadyPushed(noteid):
             logging.info("skipping already pushed")
             return
-        appcode = "EA506-AAE0E"
-        #appcode = "27D11-8F224" #debugging appcode
+        #appcode = "EA506-AAE0E"
+        appcode = "27D11-8F224" #debugging appcode
         token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
         url = BASEURL + 'createMessage'
         request = {
@@ -292,10 +311,11 @@ if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
     logging.info("update detection finished")
     updater =Updater()
-    #text = u"Inicia pleno del Senado discusión de la reforma energética "
+    #text = u"Reinician en el Senado negociación sobre reforma político-electoral"
     #link = ""
-    #noteid = "http://www.jornada.unam.mx/ultimas/2013/12/10/inicia-pleno-del-senado-discusion-de-la-reforma-energetica-7051.html"
+    #noteid = "reinician-en-el-senado-negociacion-de-leyes-reglamentarias-e"
     #updater.pushThisNote(text, link, noteid)
+    #updater.purgePushHistory()
     
     
  
