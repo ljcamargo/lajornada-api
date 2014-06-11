@@ -57,7 +57,7 @@ class FeedParser(parsing):
             a =  '/ultimas/portada.xml'
             
         if res == "newultimas":
-            s = 'www.jornada.com.mx'
+            s = 'www.jornada.unam.mx'
             a =  '/ultimas/newsml-g2.xml'   
             
         if res == "cartones":
