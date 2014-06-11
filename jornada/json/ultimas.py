@@ -316,7 +316,7 @@ class Ultimas(FeedParser):
         elif (name==u'Mundo'):
             return 'mundo'
         elif (name==u'Sociedad y Justicia'):
-            return 'economia'
+            return 'sociedad'
         elif (name==u'Ciencias'):
             return 'ciencias'
         elif (name==u'Cultura'):
