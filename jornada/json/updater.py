@@ -227,8 +227,8 @@ class Updater(object):
         if self.checkAlreadyPushed(noteid):
             logging.info("skipping already pushed")
             return
-        #appcode = "EA506-AAE0E"
-        appcode = "27D11-8F224" #debugging appcode
+        appcode = "EA506-AAE0E"
+        #appcode = "27D11-8F224" #debugging appcode
         token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
         url = BASEURL + 'createMessage'
         request = {
