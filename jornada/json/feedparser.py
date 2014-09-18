@@ -242,7 +242,7 @@ class FeedParser(parsing):
             section = "espectaculos"   
         if "dep" in id:
             section = "deportes"                                                                                                             
-        r = "http://www.jornada.unam.mx/"+section+"/"+self.year+"/"+self.month+"/"+self.day+"/"  + id
+        r = "http://www.jornada.unam.mx/"+self.year+"/"+self.month+"/"+self.day+"/"+section+"/"+id
         return r
     
     def getUNavUrl(self, id):
