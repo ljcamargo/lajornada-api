@@ -21,7 +21,7 @@ BASEURL = "https://cp.pushwoosh.com/json/1.3/"
 
 class Updater(object):
     
-    MAX_SIM_PUSH = 2
+    MAX_SIM_PUSH = 1
 
     def __init__(self): 
         logging.getLogger().setLevel(logging.INFO)
