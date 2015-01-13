@@ -310,7 +310,7 @@ class Updater(object):
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
     logging.info("update detection finished")
-    updater =Updater()
+    updater = Updater()
     #text = u"Reinician en el Senado negociación sobre reforma político-electoral"
     #link = ""
     #noteid = "reinician-en-el-senado-negociacion-de-leyes-reglamentarias-e"

@@ -86,7 +86,7 @@ class Ultimas(FeedParser):
         self.setHistoricFile()
         j =  json.dumps(jItems, True, True, False, False, None, 3, None, 'utf-8', None, sort_keys=False)
         filename = const.SAVING_ROUTE + '/' +  const.SAVING_NAME_CURRENT + 'last.json'
-        f = open(filename, 'w')
+        f = open(filename, 'w+')
         logging.info('writting: %s' % filename)
         f.write(j)
         f.close()

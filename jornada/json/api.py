@@ -18,13 +18,14 @@ import logging
 class Api(object):
 
     def __init__(self, family="", section="", mtype="", txt="", noteid="", date="", detail="", richness="html", source="impresa",
-                 action="", user=""):
+                 action="", user="", callback=""):
         
         logging.getLogger().setLevel(logging.INFO)
         
         self.DETAIL_NO_CONTENT = "nocontent"
         self.DETAIL_MINIMAL = "minimal"
         self.action = action if action != None else ""
+        self.callback = callback if callback != None else ""
         self.user = user if user != None else ""
         self.family = family if family != None else ""
         self.section = section if section != None else ""
@@ -279,10 +280,14 @@ class Api(object):
         
             
     def getResult(self):
-        return self.result  
+        if (self.callback):
+            return "%s(%s)" % (self.callback, self.result)
+        else:
+            return self.result
 
                       
 if __name__ == '__main__':
     pass
     #miapi =Api(action="update")
-    print Api(action="pushreport").getResult()
+    #print Api(action="pushreport").getResult()
+    #print Api(callback='functionid').getResult();
