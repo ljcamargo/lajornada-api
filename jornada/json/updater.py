@@ -262,6 +262,42 @@ class Updater(object):
             logging.info(status)
             logging.info(response)
             self.registerPushed(text, link, noteid, request)
+            self.pushThisNoteMirror(self, text, link, noteid)
+
+    def pushThisNoteMirror(self, text, link, noteid):
+        appcode = "fill_with_app_code" #mirror appcode
+        token = "5y2m8EkDJ1urdRPQfIFYpQguNhxXqBk/nvyx7vKnANrUpsseqvN6VmiNJuUPfosXrcE0BWpORQlK9/c9nvgY"
+        url = BASEURL + 'createMessage'
+        request = {
+            "request":{
+                "application":appcode,
+                "auth":token,
+                "notifications":[
+                   {
+                      "send_date":"now", 
+                      "ignore_user_timezone": True,
+                      "content": text,
+                      "data": {
+                            "noteid": noteid
+                      },     
+                   }
+                ]
+            }
+        }
+        body = json.dumps(request)
+        logging.info(body)
+        code, response = self._request("POST", body, url)
+        logging.info(response)
+        
+        if code != 200:
+            logging.error("error code->")
+            logging.error(code)
+        else:
+            dresponse = json.loads(response)
+            status = dresponse['status_code']
+            response = dresponse['status_message']
+            logging.info(status)
+            logging.info(response)
     
     def _request(self, method, body, url):
         connection = httplib.HTTPSConnection(SERVER)
